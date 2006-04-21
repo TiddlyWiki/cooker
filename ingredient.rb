@@ -1,4 +1,5 @@
 require 'cgi'
+require 'tiddlywiki'
 
 class Ingredient
   def initialize(filename, type, attributes=nil)
@@ -34,12 +35,9 @@ class Ingredient
   protected
     def to_s_tiddler
       File.open(@filename) do |infile|
-        out = "<div tiddler=\"" + @title + "\" modifier=\"" + @author
-        out += "\" modified=\"" + modified(infile)
-        out += "\" created=\"" + created(infile)
-        out += "\" tags=\"" + @tags + "\">"
-        infile.each_line {|line| out << CGI::escapeHTML(line).sub("\n", "\\n") } 
-        out +="</div>\n"
+        contents = ""
+        infile.each_line {|line| contents << line } 
+        Tiddlywiki.tiddle(@title, @author, modified(infile), created(infile), @tags, contents)
       end
     end
     

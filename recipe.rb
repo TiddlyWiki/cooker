@@ -1,8 +1,9 @@
 require 'ingredient'
 
 class Recipe
-  def initialize(filename)
+  def initialize(filename, outdir=nil)
     @filename = filename
+    @outdir = outdir
     @ingredients = Array.new
     @addons = Hash.new
     File.open(filename) do |file|
@@ -26,8 +27,12 @@ class Recipe
   end
   
   protected
+    def outdir
+      outdir ||= ""
+    end
+    
     def outfilename
-      @filename.sub(".recipe", "")
+      @outdir + File.basename(@filename.sub(".recipe", ""))
     end
     
     def ingredients
