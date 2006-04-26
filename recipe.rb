@@ -1,4 +1,5 @@
 require 'ingredient'
+require "ftools"
 
 class Recipe
   def initialize(filename, outdir=nil)
@@ -13,17 +14,20 @@ class Recipe
   
   def cook
     puts "Creating file: " + outfilename
-    File.open(outfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
-      @ingredients.each do |ingredient|
-        if ingredient.type == "list"
-          if @addons.has_key?(ingredient.filename)
-            @addons.fetch(ingredient.filename).each{|ingredient| writeToDish(out, ingredient)}
+    if(@ingredients.length > 0)
+      File.open(outfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+        @ingredients.each do |ingredient|
+          if ingredient.type == "list"
+            if @addons.has_key?(ingredient.filename)
+              @addons.fetch(ingredient.filename).each{|ingredient| writeToDish(out, ingredient)}
+            end
+          else
+            writeToDish(out, ingredient)
           end
-        else
-          writeToDish(out, ingredient)
         end
       end
     end
+    @addons.fetch("copy", Array.new).each { |ingredient| copyFile(ingredient) }
   end
   
   protected
@@ -83,5 +87,10 @@ class Recipe
     def writeToDish(outfile, ingredient)
       puts "Writing: " + ingredient.filename
       outfile << ingredient
+    end
+    
+    def copyFile(ingredient)
+      puts "Copying: " + ingredient.filename
+      File.copy(ingredient.filename, @outdir + File.basename(ingredient.filename))
     end
 end
