@@ -13,7 +13,7 @@ class Optparse
     options.hashid = false
     
     opts = OptionParser.new do |opts|
-      opts.banner = "Cooker Build: " + $BUILD + ", Version: " + $VERSION + " Usage: cook.rb recipename [options]"
+      opts.banner = "Cooker Build: " + $BUILD + ", Version: " + $VERSION + "\nUsage: cook.rb recipename [options]"
       opts.separator ""
       opts.separator "Specific options:"
       
