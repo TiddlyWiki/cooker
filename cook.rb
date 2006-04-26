@@ -4,7 +4,7 @@ require 'optparse'
 require 'ostruct'
 
 $VERSION = "0.9.1"
-$BUILD = "$Rev$"
+$BUILD = "$Revision$"
 
 class Optparse
   def self.parse(args)
