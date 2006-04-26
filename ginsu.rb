@@ -3,6 +3,9 @@ require 'splitter'
 require 'optparse'
 require 'ostruct'
 
+$VERSION = "0.9.1"
+$BUILD = "$Rev$"
+
 class Optparse
   def self.parse(args)
     options = OpenStruct.new
