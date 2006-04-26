@@ -2,6 +2,8 @@ require 'cgi'
 require 'tiddlywiki'
 
 class Ingredient
+  @@hashid = false
+  
   def initialize(filename, type, attributes=nil)
     @filename = filename
     @type = type
@@ -11,6 +13,14 @@ class Ingredient
       end
     end
     parseAttributes(attributes) if attributes
+  end
+  
+  def Ingredient.hashid
+    @@hashid
+  end
+  
+  def Ingredient.hashid=(hashid)
+    @@hashid = hashid
   end
   
   def filename
@@ -25,8 +35,12 @@ class Ingredient
     #"to_s_#{@type}".to_sym
     subtype = type.split('.')
     if subtype[0] == "list"
-    elsif (subtype[0] == "tiddler" && !(filename =~ /.tiddler/)) || @tiddle
-      return to_s_tiddler
+    elsif (subtype[0] == "tiddler")
+      if(filename =~ /.tiddler/)
+        return to_s_retiddle
+      else
+        return to_s_tiddler
+      end
     else
       return to_s_line
     end
@@ -37,7 +51,28 @@ class Ingredient
       File.open(@filename) do |infile|
         contents = ""
         infile.each_line {|line| contents << line } 
-        Tiddlywiki.tiddle(@title, @author, modified(infile), created(infile), @tags, contents)
+        id = nil
+        id = Tiddlywiki.hashid(contents, File.expand_path(@filename)) if @@hashid
+        Tiddlywiki.tiddle(@title, @author, modified(infile), created(infile), @tags, contents, id)
+      end
+    end
+    
+    def to_s_retiddle
+      File.open(@filename) do |infile|
+        contents = ""
+        infile.each_line do |line|
+          tiddler = Tiddlywiki.untiddle(line)
+          id = nil
+          id = Tiddlywiki.hashid(tiddler["contents"], File.expand_path(@filename)) if @@hashid
+          contents << Tiddlywiki.tiddle(tiddler["title"] ||= @title,
+                                        tiddler["modifier"] ||= "",
+                                        tiddler["modified"] ||= modified(infile),
+                                        tiddler["created"] ||= created(infile),
+                                        tiddler["tags"] ||= "",
+                                        tiddler["contents"] ||= "",
+                                        id)
+        end
+        return contents
       end
     end
     

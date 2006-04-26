@@ -1,13 +1,17 @@
+require 'digest/sha1'
+
 class Tiddlywiki
-  def Tiddlywiki.tiddle(title, author, modified, created, tags, contents)
-    out = "<div tiddler=\"" + title + "\" modifier=\"" + author
+  def Tiddlywiki.tiddle(title, author, modified, created, tags, contents, hashid=nil)
+    out = "<div tiddler=\"" + title
+    out += "\" id=\"" + hashid if hashid
+    out += "\" modifier=\"" + author
     out += "\" modified=\"" + modified
     out += "\" created=\"" + created
     out += "\" tags=\"" + tags + "\">"
     contents.each {|line| out << CGI::escapeHTML(line).sub("\n", "\\n") }
     out +="</div>\n"
   end
-
+  
   def Tiddlywiki.untiddle(tiddler)
     rethash = Hash.new()
     rethash["title"] = Tiddlywiki.getTiddlerAttribute(tiddler, "tiddler")
@@ -32,6 +36,12 @@ class Tiddlywiki
     out << "modified: " + tiddler["modified"] + "\n"
     out << "created: " + tiddler["created"] + "\n"
     out << "tags: " + tiddler["tags"] + "\n"
+  end
+  
+  def Tiddlywiki.hashid(contents, path)
+    contenthash = Digest::SHA1.hexdigest(contents ||= "")
+    pathhash = Digest::SHA1.hexdigest(path)
+    return pathhash.1..10 + "." + contenthash.1..10
   end
   
   protected

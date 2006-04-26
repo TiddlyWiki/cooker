@@ -7,6 +7,7 @@ class Optparse
   def self.parse(args)
     options = OpenStruct.new
     options.dest = ""
+    options.hashid = false
     
     opts = OptionParser.new do |opts|
       opts.banner = "Usage: cook.rb recipename [options]"
@@ -19,6 +20,10 @@ class Optparse
           exit
         end
         options.dest = dest
+      end
+      
+      opts.on("-i", "--hashid", "Add hash id to all tiddlers") do |i|
+        options.hashid = i
       end
       
       # No argument, shows at tail.  This will print an options summary.
@@ -41,6 +46,8 @@ ARGV.each do |file|
     exit
   end
 end
+
+Ingredient.hashid = options.hashid
 
 ARGV.each do |file|
   recipe = Recipe.new(file, options.dest)
