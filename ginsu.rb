@@ -12,7 +12,7 @@ class Optparse
     options.dest = ""
     
     opts = OptionParser.new do |opts|
-      opts.banner = "Usage: ginsu.rb tiddlywikiname"
+      opts.banner = "Ginsu Build: " + $BUILD + ", Version: " + $VERSION + "\nUsage: ginsu.rb [tiddlywikiname]"
       opts.separator ""
       opts.separator "Specific options:"
       
