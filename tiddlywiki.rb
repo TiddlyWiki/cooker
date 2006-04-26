@@ -41,7 +41,7 @@ class Tiddlywiki
   def Tiddlywiki.hashid(contents, path)
     contenthash = Digest::SHA1.hexdigest(contents ||= "")
     pathhash = Digest::SHA1.hexdigest(path)
-    return pathhash.1..10 + "." + contenthash.1..10
+    return "0x" + pathhash.slice(0..9) + ".0x" + contenthash.slice(0..9)
   end
   
   protected
