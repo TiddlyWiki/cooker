@@ -3,6 +3,9 @@ require 'recipe'
 require 'optparse'
 require 'ostruct'
 
+$VERSION = "0.9.1"
+$BUILD = "$Rev$"
+
 class Optparse
   def self.parse(args)
     options = OpenStruct.new
@@ -10,7 +13,7 @@ class Optparse
     options.hashid = false
     
     opts = OptionParser.new do |opts|
-      opts.banner = "Usage: cook.rb recipename [options]"
+      opts.banner = "Cooker Build: " + $BUILD + ", Version: " + $VERSION + " Usage: cook.rb recipename [options]"
       opts.separator ""
       opts.separator "Specific options:"
       
