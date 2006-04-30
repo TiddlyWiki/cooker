@@ -3,7 +3,7 @@ require 'recipe'
 require 'optparse'
 require 'ostruct'
 
-$VERSION = "0.9"
+$VERSION = "0.9.1"
 $BUILD = "$Revision$"
 
 class Optparse

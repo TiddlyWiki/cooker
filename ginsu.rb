@@ -3,7 +3,7 @@ require 'splitter'
 require 'optparse'
 require 'ostruct'
 
-$VERSION = "0.9.1 unreleased"
+$VERSION = "0.9.1"
 $BUILD = "$Rev$"
 
 class Optparse
