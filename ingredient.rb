@@ -36,7 +36,7 @@ class Ingredient
     subtype = type.split('.')
     if subtype[0] == "list"
     elsif (subtype[0] == "tiddler")
-      if(filename =~ /.tiddler/)
+      if(@filename =~ /\.tiddler/)
         return to_s_retiddle
       else
         return to_s_tiddler
@@ -82,13 +82,17 @@ class Ingredient
     
     def parseAttributes(attributes)
       for i in 0...attributes.length
-        enum = attributes[i].split('=')
+        enum = attributes[i].split(':')
         case enum[0]
-          when "title" || "tiddler"
+          when "title"
+            @title = enum[1]
+          when "tiddler"
             @title = enum[1]
           when "tags"
             @tags = enum[1]
-          when "author" || "modifier"
+          when "author"
+            @author = enum[1]
+          when "modifier"
             @author = enum[1]
           when "tiddle"
             @tiddle = true
@@ -97,7 +101,7 @@ class Ingredient
           when "created"
             @created = enum[1]
           else
-            puts "Unknown attribute: " + enum[0] + "=" + enum[1]
+            puts "Unknown attribute: " + enum[0] != nil ? enum[0] : "" + "=" + enum[1] != nil ? enum[1] : "" 
         end
       end
     end

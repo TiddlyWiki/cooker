@@ -22,7 +22,7 @@ class Splitter
       File.open(@dirname + "/split.recipe", File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipe|
         file.each_line do |line|
           start = true if line =~ /<div id="storeArea">/
-          extractTiddler(line.sub(/<div id="storeArea">/, "").strip, recipe) if start
+          extractTiddler(line.sub(/.*<div id="storeArea">/, "").strip, recipe) if start
         end
       end
     end

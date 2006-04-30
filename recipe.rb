@@ -48,7 +48,9 @@ class Recipe
     end
     
     def genIngredient(dirname, line)
-      if line =~ /@.*@/
+      if line.strip == ""
+        return
+      elsif line =~ /@.*@/
         @ingredients << Ingredient.new(line.strip.slice(1..-2), "list")
       elsif line =~ /recipe\:/
         loadSubrecipe(dirname + "/" + line.sub(/recipe\:/, "").strip)
