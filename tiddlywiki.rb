@@ -1,4 +1,5 @@
 require 'digest/sha1'
+require 'cgi'
 
 class Tiddlywiki
   def Tiddlywiki.tiddle(title, author, modified, created, tags, contents, hashid=nil)
