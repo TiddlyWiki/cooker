@@ -2,6 +2,7 @@ require 'tiddlywiki'
 
 class Splitter
   def initialize(filename)
+    @numprocessed = 0
     @filename = filename
     dirset = false
     dirnum = 0;
@@ -26,16 +27,22 @@ class Splitter
         end
       end
     end
+    if @numprocessed == 0
+      puts @filename + " Does not contain any tiddlers"
+    else
+      puts "\n" + @filename + " processed, " + @numprocessed.to_s + " tiddlers written to " + @dirname + "/"
+    end
   end
   
   def extractTiddler(line, recipefile)
+    @numprocessed += 1
     if line =~ /<div tiddler=.*<\/div>/
       tiddler = Tiddlywiki.untiddle(line)
       newfilename = ""
       if(tiddler["tags"] =~ /systemConfig/)
         newfilename = tiddler["title"].to_s + ".js"
-        while newfilename =~ /[\/: ]/ do
-          newfilename = newfilename.sub(/[\/: ]/, "_")
+        while newfilename =~ /[\/:?#\* ]/ do
+          newfilename = newfilename.sub(/[\/:?#\* ]/, "_")
         end
         File.open(@dirname + "/" + newfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
           out << tiddler["contents"]
@@ -45,14 +52,15 @@ class Splitter
         end
       else
         newfilename = tiddler["title"].to_s + ".tiddler"
-        while newfilename =~ /[\/: ]/ do
-          newfilename = newfilename.sub(/[\/: ]/, "_")
+        while newfilename =~ /[\/:\?#\* ]/ do
+          newfilename = newfilename.sub(/[\/:\?#\* ]/, "_")
         end
         File.open(@dirname + "/" + newfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
           out << line
         end
       end
       recipefile << "tiddler: " + newfilename + "\n"
+      puts "Writing: " + tiddler["title"].to_s
     end
   end
 end

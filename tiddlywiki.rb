@@ -35,7 +35,7 @@ class Tiddlywiki
     out = "title: " + tiddler["title"] + "\n"
     out << "modifier: " + tiddler["modifier"] + "\n"
     out << "modified: " + tiddler["modified"] + "\n"
-    out << "created: " + tiddler["created"] + "\n"
+    out << "created: " + tiddler["created"] + "\n" if tiddler["created"]
     out << "tags: " + tiddler["tags"] + "\n"
   end
   
