@@ -41,8 +41,8 @@ class Splitter
       newfilename = ""
       if(tiddler["tags"] =~ /systemConfig/)
         newfilename = tiddler["title"].to_s + ".js"
-        while newfilename =~ /[\/:?#\* ]/ do
-          newfilename = newfilename.sub(/[\/:?#\* ]/, "_")
+        while newfilename =~ /[\/:\?#\*<> ]/ do
+          newfilename = newfilename.sub(/[\/:\?#\*<> ]/, "_")
         end
         File.open(@dirname + "/" + newfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
           out << tiddler["contents"]
@@ -52,8 +52,8 @@ class Splitter
         end
       else
         newfilename = tiddler["title"].to_s + ".tiddler"
-        while newfilename =~ /[\/:\?#\* ]/ do
-          newfilename = newfilename.sub(/[\/:\?#\* ]/, "_")
+        while newfilename =~ /[\/:\?#\*<> ]/ do
+          newfilename = newfilename.sub(/[\/:\?#\*<> ]/, "_")
         end
         File.open(@dirname + "/" + newfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
           out << line

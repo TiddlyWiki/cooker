@@ -3,12 +3,12 @@ require 'cgi'
 
 class Tiddlywiki
   def Tiddlywiki.tiddle(title, author, modified, created, tags, contents, hashid=nil)
-    out = "<div tiddler=\"" + title
-    out += "\" id=\"" + hashid if hashid
-    out += "\" modifier=\"" + author
-    out += "\" modified=\"" + modified
-    out += "\" created=\"" + created
-    out += "\" tags=\"" + tags + "\">"
+    out = "<div tiddler=\"" + title.strip
+    out += "\" id=\"" + hashid.strip if hashid
+    out += "\" modifier=\"" + author.strip
+    out += "\" modified=\"" + modified.strip
+    out += "\" created=\"" + created.strip
+    out += "\" tags=\"" + tags.strip + "\">"
     contents.each {|line| out << CGI::escapeHTML(line).sub("\n", "\\n") }
     out +="</div>\n"
   end
