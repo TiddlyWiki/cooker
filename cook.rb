@@ -45,7 +45,7 @@ options = Optparse.parse(ARGV)
 
 ARGV.each do |file|
   if(!File.exist?(file))
-    STDERR.puts("ERROR: File: " + file + " Does not exist.")
+    STDERR.puts("ERROR, File: " + file + " Does not exist.")
     exit
   end
 end
