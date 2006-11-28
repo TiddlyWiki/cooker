@@ -65,9 +65,9 @@ class Ingredient
           id = nil
           id = Tiddlywiki.hashid(tiddler["contents"], File.expand_path(@filename)) if @@hashid
           contents << Tiddlywiki.tiddle(tiddler["title"] ||= @title,
-                                        tiddler["modifier"] ||= "",
-                                        tiddler["modified"] ||= modified(infile),
-                                        tiddler["created"] ||= created(infile),
+                                        tiddler["modifier"],
+                                        tiddler["modified"],
+                                        tiddler["created"],
                                         tiddler["tags"] ||= "",
                                         tiddler["contents"] ||= "",
                                         id)
