@@ -9,7 +9,7 @@ class Tiddlywiki
     out += "\" modified=\"" + modified.strip
     out += "\" created=\"" + created.strip
     out += "\" tags=\"" + tags.strip + "\">"
-    contents.each {|line| out << CGI::escapeHTML(line).sub("\n", "\\n") }
+    contents.each { |line| out << CGI::escapeHTML(line).gsub("\\", "\\s").sub("\n", "\\n").sub("\r", "") }
     out +="</div>\n"
   end
   
@@ -20,10 +20,7 @@ class Tiddlywiki
     rethash["modified"] = Tiddlywiki.getTiddlerAttribute(tiddler, "modified")
     rethash["created"] = Tiddlywiki.getTiddlerAttribute(tiddler, "created")
     rethash["tags"] = Tiddlywiki.getTiddlerAttribute(tiddler, "tags")
-    content = CGI::unescapeHTML(tiddler.sub("</div>", "").sub(/<div.*?>/, ""))
-    while content =~ /\\n/ do
-      content = content.sub("\\n", "\n" )
-    end
+    content = CGI::unescapeHTML(tiddler.sub("</div>", "").sub(/<div.*?>/, "").gsub("\\n", "\n").gsub("\\s", "\\").sub("\r", ""))
     rethash["contents"] = content
     return rethash
   end
