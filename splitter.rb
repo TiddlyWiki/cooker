@@ -23,44 +23,40 @@ class Splitter
       File.open(@dirname + "/split.recipe", File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipe|
         file.each_line do |line|
           start = true if line =~ /<div id="storeArea">/
-          extractTiddler(line.sub(/.*<div id="storeArea">/, "").strip, recipe) if start
+          line = line.sub(/.*<div id="storeArea">/, "").strip
+          if(line =~ /<div tiddler=.*<\/div>/)
+            extractTiddler(line, recipe) if start
+          end
         end
       end
     end
-    if @numprocessed == 0
-      puts @filename + " Does not contain any tiddlers"
+    if(@numprocessed == 0)
+      puts "#{@filename} does not contain any tiddlers"
     else
-      puts "\n" + @filename + " processed, " + @numprocessed.to_s + " tiddlers written to " + @dirname + "/"
+      puts "\n#{@filename} processed, #{@numprocessed.to_s} tiddlers written to #{@dirname}/"
     end
   end
-  
+
+  private
   def extractTiddler(line, recipefile)
     @numprocessed += 1
-    if line =~ /<div tiddler=.*<\/div>/
-      tiddler = Tiddlywiki.untiddle(line)
-      newfilename = ""
-      if(tiddler["tags"] =~ /systemConfig/)
-        newfilename = tiddler["title"].to_s + ".js"
-        while newfilename =~ /[\/:\?#\*<> ]/ do
-          newfilename = newfilename.sub(/[\/:\?#\*<> ]/, "_")
-        end
-        File.open(@dirname + "/" + newfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
-          out << tiddler["contents"]
-        end
-        File.open(@dirname + "/" + newfilename + ".meta", File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
-          out << Tiddlywiki.metadata(tiddler)
-        end
-      else
-        newfilename = tiddler["title"].to_s + ".tiddler"
-        while newfilename =~ /[\/:\?#\*<> ]/ do
-          newfilename = newfilename.sub(/[\/:\?#\*<> ]/, "_")
-        end
-        File.open(@dirname + "/" + newfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
-          out << line
-        end
+    tiddler = Tiddlywiki.untiddle(line)
+    newfilename = tiddler["title"].to_s.gsub(/[\/:\?#\*<> ]/, "_")
+    if(tiddler["tags"] =~ /systemConfig/)
+      newfilename += ".js"
+      File.open(@dirname + "/" + newfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+        out << tiddler["contents"]
       end
-      recipefile << "tiddler: " + newfilename + "\n"
-      puts "Writing: " + tiddler["title"].to_s
+      File.open(@dirname + "/" + newfilename + ".meta", File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+        out << Tiddlywiki.metadata(tiddler)
+      end
+    else
+      newfilename += ".tiddler"
+      File.open(@dirname + "/" + newfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+        out << line
+      end
     end
+    recipefile << "tiddler: " + newfilename + "\n"
+    puts "Writing: " + tiddler["title"].to_s
   end
 end
