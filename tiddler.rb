@@ -2,7 +2,6 @@ require 'cgi'
 
 class Tiddler
 	def initialize
-		@attributes = Hash.new()
 		@usePre = false
 	end
 	attr_accessor :usePre
@@ -17,12 +16,13 @@ class Tiddler
 		return @attributes[name]
 	end
 
-	def set(title, modifier, created, modified, tags, contents)
+	def set(title, modifier, created, modified, tags, attributes, contents)
 		@title = title.strip
 		@modifier = modifier.strip
 		@created = created.strip
 		@modified = modified.strip
 		@tags = tags.strip
+		@attributes = attributes
 		@contents = contents
 	end
 
@@ -61,11 +61,9 @@ class Tiddler
 		out << (@usePre ? "title=\"#{@title}\"" : "tiddler=\"#{@title}\"")
 		out << " modifier=\"#{@modifier}\"" if @modifier
 		out << " created=\"#{@created}\"" if @created
-		out << " modified=\"#{@modified}\"" if @modified
-		out << " tags=\"#{@tags}\"" # if @tags
-		@attributes.each_pair do |key, value|
-			out << " #{key}=\"#{value}\""
-		end
+		out << " modified=\"#{@modified}\"" if @modified && @modified != @created
+		out << " tags=\"#{@tags}\"" if @tags
+		@attributes.each_pair { |key, value| out << " #{key}=\"#{value}\"" } if @attributes
 		out << ">"
 		if(@usePre)
 			out << "\n<pre>"
@@ -100,9 +98,9 @@ protected
 	def parseExtendedAttributes(divText)
 		attributesRE = Regexp.new('<div (.*)>.*</div>')
 		attributeRE = Regexp.new('([^\s\t]*)="([^"]*)"')
-		pairs = attributesRE.match(divText)[1].to_s.split(attributeRE)
-		0.step(pairs.size - 1, 3) do |i|
-			key, value = pairs[i + 1], pairs[i + 2]
+		attributes = attributesRE.match(divText)[1].to_s.split(attributeRE)
+		0.step(attributes.size - 1, 3) do |i|
+			key, value = attributes[i + 1], attributes[i + 2]
 			@attributes.store(key, value) unless key =~ /\Atiddler\Z|\Atitle\Z|\Amodifier\Z|\Aauthor\Z|\Amodified\Z|\Acreated\Z|\Atags\Z/
 		end
 	end

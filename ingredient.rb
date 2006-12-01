@@ -5,6 +5,7 @@ class Ingredient
 	@@hashid = false
 	
 	def initialize(filename, type, attributes=nil)
+		@attributes = Hash.new()
 		@filename = filename
 		@type = type
 		if(File.exists?(filename + ".meta"))
@@ -51,8 +52,10 @@ protected
 		File.open(@filename) do |infile|
 			contents = ""
 			tiddler = Tiddler.new
-			infile.each_line { |line| contents << line }
-			tiddler.set(@title, @author, created(infile), modified(infile), @tags, contents)
+			infile.each_line do |line|
+				contents << line unless line.strip =~ /^\/\/#/
+			end
+			tiddler.set(@title, @author, created(infile), modified(infile), @tags, @attributes, contents)
 			return tiddler.to_div + "\n"
 		end
 	end
@@ -68,31 +71,39 @@ protected
 	end
 	
 	def to_s_line
-		File.open(@filename, 'r').readlines.join
+		File.open(@filename) do |infile|
+			contents = ""
+			infile.each_line do |line|
+				contents << line unless line.strip =~ /^\/\/#/
+			end
+			return contents
+		end
 	end
 
 	def parseAttributes(attributes)
 		for i in 0...attributes.length
-			enum = attributes[i].split(':')
-			case enum[0]
+			line = attributes[i]
+			key = line[0, line.index(':')].strip
+			value = line[(line.index(':') + 1)...line.length].strip
+			case key
 				when "title"
-					@title = enum[1]
+					@title = value
 				when "tiddler"
-					@title = enum[1]
+					@title = value
 				when "tags"
-					@tags = enum[1]
+					@tags = value
 				when "author"
-					@author = enum[1]
+					@author = value
 				when "modifier"
-					@author = enum[1]
+					@author = value
 				when "tiddle"
 					@tiddle = true
 				when "modified"
-					@modified = enum[1]
+					@modified = value
 				when "created"
-					@created = enum[1]
+					@created = value
 				else
-					puts "Unknown attribute: " + enum[0] != nil ? enum[0] : "" + "=" + enum[1] != nil ? enum[1] : "" 
+					@attributes[key] = value
 			end
 		end
 	end
