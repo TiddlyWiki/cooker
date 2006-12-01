@@ -1,5 +1,5 @@
 require 'cgi'
-require 'tiddlywiki'
+require 'tiddler'
 
 class Ingredient
 	@@hashid = false
@@ -45,41 +45,32 @@ class Ingredient
 			return to_s_line
 		end
 	end
-	
+
 protected
 	def to_s_tiddler
 		File.open(@filename) do |infile|
 			contents = ""
-			infile.each_line { |line| contents << line } 
-			id = nil
-			id = Tiddlywiki.hashid(contents, File.expand_path(@filename)) if @@hashid
-			Tiddlywiki.tiddle(@title, @author, modified(infile), created(infile), @tags, contents, id)
+			tiddler = Tiddler.new
+			infile.each_line { |line| contents << line }
+			tiddler.set(@title, @author, created(infile), modified(infile), @tags, contents)
+			return tiddler.to_div + "\n"
 		end
 	end
 	
 	def to_s_retiddle
 		File.open(@filename) do |infile|
-			contents = ""
+			tiddler= Tiddler.new
 			infile.each_line do |line|
-				tiddler = Tiddlywiki.untiddle(line)
-				id = nil
-				id = Tiddlywiki.hashid(tiddler["contents"], File.expand_path(@filename)) if @@hashid
-				contents << Tiddlywiki.tiddle(tiddler["title"] ||= @title,
-								tiddler["modifier"],
-								tiddler["modified"],
-								tiddler["created"],
-								tiddler["tags"] ||= "",
-								tiddler["contents"] ||= "",
-								id)
+				tiddler.from_div(line)
 			end
-			return contents
+			return tiddler.to_div + "\n"
 		end
 	end
 	
 	def to_s_line
 		File.open(@filename, 'r').readlines.join
 	end
-	
+
 	def parseAttributes(attributes)
 		for i in 0...attributes.length
 			enum = attributes[i].split(':')
@@ -105,19 +96,19 @@ protected
 			end
 		end
 	end
-	
+
 	def modified(infile)
 		@modified ||= infile.ctime.strftime("%Y%m%d%M%S")
 	end
-	
+
 	def created(infile)
 		@created ||= infile.mtime.strftime("%Y%m%d%M%S")
 	end
-	
+
 	def title
 		@title ||= @filename
 	end
-	
+
 	def author
 		@author ||= ""
 	end

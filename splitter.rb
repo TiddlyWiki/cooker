@@ -1,4 +1,4 @@
-require 'tiddlywiki'
+require 'tiddler'
 
 class Splitter
 	def initialize(filename)
@@ -26,8 +26,9 @@ class Splitter
 					line = line.sub(/.*<div id="storeArea">/, "").strip
 					if(start && line =~ /<div tiddler=.*<\/div>/)
 						tiddlerCount += 1
-						tiddler = Tiddlywiki.untiddle(line)
-						writeTiddler(line, tiddler, recipefile)
+						tiddler = Tiddler.new
+						tiddler.from_div(line)
+						writeTiddler(tiddler, recipefile)
 					end
 				end
 			end
@@ -40,23 +41,23 @@ class Splitter
 	end
 
 private
-	def writeTiddler(line, tiddler, recipefile)
-		tiddlerFilename = tiddler["title"].to_s.gsub(/[\/:\?#\*<> ]/, "_")
-		if(tiddler["tags"] =~ /systemConfig/)
+	def writeTiddler(tiddler, recipefile)
+		tiddlerFilename = tiddler.title.to_s.gsub(/[\/:\?#\*<> ]/, "_")
+		if(tiddler.tags =~ /systemConfig/)
 			tiddlerFilename += ".js"
 			File.open(@dirname + "/" + tiddlerFilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
-				out << tiddler["contents"]
+				out << tiddler.contents
 			end
 			File.open(@dirname + "/" + tiddlerFilename + ".meta", File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
-				out << Tiddlywiki.metadata(tiddler)
+				out << tiddler.to_meta
 			end
 		else
 			tiddlerFilename += ".tiddler"
 			File.open(@dirname + "/" + tiddlerFilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
-				out << line
+				out << tiddler.to_div
 			end
 		end
 		recipefile << "tiddler: #{tiddlerFilename}\n"
-		puts "Writing: #{tiddler["title"].to_s}"
+		puts "Writing: #{tiddler.title}"
 	end
 end
