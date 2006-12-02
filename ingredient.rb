@@ -5,9 +5,9 @@ class Ingredient
 	@@hashid = false
 	
 	def initialize(filename, type, attributes=nil)
-		@attributes = Hash.new()
 		@filename = filename
 		@type = type
+		@extendedAttributes = Hash.new
 		if(File.exists?(filename + ".meta"))
 			File.open(filename+ ".meta") do |file|
 				file.each_line { |line| attributes.unshift(line.strip) }
@@ -55,7 +55,7 @@ protected
 			infile.each_line do |line|
 				contents << line unless line.strip =~ /^\/\/#/
 			end
-			tiddler.set(@title, @author, created(infile), modified(infile), @tags, @attributes, contents)
+			tiddler.set(@title, @author, created(infile), modified(infile), @tags, @extendedAttributes, contents)
 			return tiddler.to_div + "\n"
 		end
 	end
@@ -103,7 +103,7 @@ protected
 				when "created"
 					@created = value
 				else
-					@attributes[key] = value
+					@extendedAttributes[key] = value
 			end
 		end
 	end

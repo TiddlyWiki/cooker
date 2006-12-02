@@ -3,6 +3,7 @@ require 'cgi'
 class Tiddler
 	def initialize
 		@usePre = false
+		@extendedAttributes = Hash.new
 	end
 	attr_accessor :usePre
 	attr_reader :title
@@ -12,8 +13,8 @@ class Tiddler
 	attr_reader :tags
 	attr_reader :contents
 
-	def attribute(name)
-		return @attributes[name]
+	def extendedAttribute(name)
+		return @extendedAttributes[name]
 	end
 
 	def set(title, modifier, created, modified, tags, attributes, contents)
@@ -22,7 +23,7 @@ class Tiddler
 		@created = created.strip
 		@modified = modified.strip
 		@tags = tags.strip
-		@attributes = attributes
+		@extendedAttributes = attributes
 		@contents = contents
 	end
 
@@ -49,9 +50,9 @@ class Tiddler
 		@tags = parseAttribute(divText, "tags")
 		parseExtendedAttributes(divText)
 		if(@usePre)
-			@contents = CGI::unescapeHTML(divText.sub(/<div.*?><pre>/,"").sub("</pre></div>","").sub("\r",""))
+			@contents = CGI::unescapeHTML(divText.sub(/<div.*?><pre>/, "").sub("</pre></div>", "").sub("\r", ""))
 		else
-			@contents = CGI::unescapeHTML(divText.sub(/<div.*?>/,"").sub("</div>","").gsub("\\n","\n").gsub("\\s","\\").sub("\r",""))
+			@contents = CGI::unescapeHTML(divText.sub(/<div.*?>/, "").sub("</div>", "").gsub("\\n", "\n").gsub("\\s", "\\").sub("\r", ""))
 		end
 	end
 	
@@ -63,7 +64,7 @@ class Tiddler
 		out << " created=\"#{@created}\"" if @created
 		out << " modified=\"#{@modified}\"" if @modified && @modified != @created
 		out << " tags=\"#{@tags}\"" if @tags
-		@attributes.each_pair { |key, value| out << " #{key}=\"#{value}\"" } if @attributes
+		@extendedAttributes.each_pair { |key, value| out << " #{key}=\"#{value}\"" }
 		out << ">"
 		if(@usePre)
 			out << "\n<pre>"
@@ -71,7 +72,7 @@ class Tiddler
 			out << "</pre>\n</div>\n"
 		else
 			@contents.each { |line| out << CGI::escapeHTML(line).gsub("\\", "\\s").sub("\n", "\\n").sub("\r", "") }
-			out <<"</div>"
+			out << "</div>"
 		end
 	end
 	
@@ -81,7 +82,7 @@ class Tiddler
 		out << "created: #{@created}\n"
 		out << "modified: #{@modified}\n"
 		out << "tags: #{@tags}\n"
-		@attributes.each_pair do |key, value|
+		@extendedAttributes.each_pair do |key, value|
 			out << "#{key}: #{value}\n"
 		end
 		return out
@@ -96,12 +97,13 @@ protected
 	end
 
 	def parseExtendedAttributes(divText)
+		standardAttributes = [ "tiddler", "title", "modifier", "author", "modified", "created", "tags" ]
 		attributesRE = Regexp.new('<div (.*)>.*</div>')
 		attributeRE = Regexp.new('([^\s\t]*)="([^"]*)"')
 		attributes = attributesRE.match(divText)[1].to_s.split(attributeRE)
 		0.step(attributes.size - 1, 3) do |i|
 			key, value = attributes[i + 1], attributes[i + 2]
-			@attributes.store(key, value) unless key =~ /\Atiddler\Z|\Atitle\Z|\Amodifier\Z|\Aauthor\Z|\Amodified\Z|\Acreated\Z|\Atags\Z/
+			@extendedAttributes.store(key, value) unless standardAttributes.include?(key)
 		end
 	end
 end
