@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
+# cook.rb
+
 require 'recipe'
 require 'optparse'
 require 'ostruct'
 
-$VERSION = "0.9.3"
+$VERSION = "0.9.4"
 $BUILD = "$Revision$"
 
 class Optparse

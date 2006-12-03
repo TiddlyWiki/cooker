@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
+# ginsu.rb
+
 require 'splitter'
 require 'optparse'
 require 'ostruct'
 
-$VERSION = "0.9.3"
+$VERSION = "0.9.4"
 $BUILD = "$Rev$"
 
 class Optparse
