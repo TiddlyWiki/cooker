@@ -1,3 +1,5 @@
+# spliter.rb
+
 require 'tiddler'
 
 class Splitter
