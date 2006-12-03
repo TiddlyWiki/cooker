@@ -1,3 +1,4 @@
+# tiddler.rb
 require 'cgi'
 
 class Tiddler
@@ -17,47 +18,54 @@ class Tiddler
 		return @extendedAttributes[name]
 	end
 
-	def set(title, modifier, created, modified, tags, attributes, contents)
+	def set(title, modifier, created, modified, tags, extendedAttributes, contents)
 		@title = title.strip
 		@modifier = modifier.strip
 		@created = created.strip
 		@modified = modified.strip
 		@tags = tags.strip
-		@extendedAttributes = attributes
+		@extendedAttributes = extendedAttributes
 		@contents = contents
 	end
 
 	def read_div(file,line)
+		divText = ""
 		if line =~ /<div tiddler=.*<\/div>/
-			this.from_div(line)
+			@usePre = false
+			divText = line
+			line = file.gets
 		elsif(line =~ /<div title=.*/)
-			text = line
-			while line !~ /<div ti/
+			@usePre = true
+			begin
+				divText << line
 				line = file.gets
-				text += line
-			end
-			this.from_div(text)
+			end while line && line !~ /<div ti/
 		end
-		line = file.gets
+		from_div(divText)
+		return line
 	end
 
 	def from_div(divText)
 		@usePre = false
 		@title = parseAttribute(divText, "tiddler")
+		if(!@title)
+			@usePre = true;
+			@title = parseAttribute(divText, "title")
+		end
 		@modifier = parseAttribute(divText, "modifier")
 		@created = parseAttribute(divText, "created")
 		@modified = parseAttribute(divText, "modified")
 		@tags = parseAttribute(divText, "tags")
 		parseExtendedAttributes(divText)
 		if(@usePre)
-			@contents = CGI::unescapeHTML(divText.sub(/<div.*?><pre>/, "").sub("</pre></div>", "").sub("\r", ""))
+			@contents = divText.sub(/<div.*?>\n<pre>/, "").sub(/<\/pre>\n<\/div>/, "")
 		else
-			@contents = CGI::unescapeHTML(divText.sub(/<div.*?>/, "").sub("</div>", "").gsub("\\n", "\n").gsub("\\s", "\\").sub("\r", ""))
+			@contents = divText.sub(/<div.*?>/, "").sub("</div>", "").gsub("\\n", "\n").gsub("\\s", "\\")
 		end
+		@contents = CGI::unescapeHTML(@contents.gsub("\r", ""))
 	end
 	
 	def to_div
-		@usePre = false
 		out = "<div "
 		out << (@usePre ? "title=\"#{@title}\"" : "tiddler=\"#{@title}\"")
 		out << " modifier=\"#{@modifier}\"" if @modifier
@@ -68,12 +76,14 @@ class Tiddler
 		out << ">"
 		if(@usePre)
 			out << "\n<pre>"
-			@contents.each { |line| out << CGI::escapeHTML(line).sub("\r", "") }
-			out << "</pre>\n</div>\n"
+			lines = (CGI::escapeHTML(@contents).gsub("\r", "")).split("\n")
+			last = lines.pop
+			lines.each { |line| out << line << "\n" }
+			out << last << "</pre>\n"
 		else
 			@contents.each { |line| out << CGI::escapeHTML(line).gsub("\\", "\\s").sub("\n", "\\n").sub("\r", "") }
-			out << "</div>"
 		end
+		out << "</div>\n"
 	end
 	
 	def to_meta
@@ -97,10 +107,13 @@ protected
 	end
 
 	def parseExtendedAttributes(divText)
-		standardAttributes = [ "tiddler", "title", "modifier", "author", "modified", "created", "tags" ]
+		return if !divText
+		standardAttributes = [ "tiddler", "title", "modifier", "modified", "created", "tags" ]
 		attributesRE = Regexp.new('<div (.*)>.*</div>')
 		attributeRE = Regexp.new('([^\s\t]*)="([^"]*)"')
-		attributes = attributesRE.match(divText)[1].to_s.split(attributeRE)
+		match = attributesRE.match(divText)
+		return if !match
+		attributes = match[1].to_s.split(attributeRE)
 		0.step(attributes.size - 1, 3) do |i|
 			key, value = attributes[i + 1], attributes[i + 2]
 			@extendedAttributes.store(key, value) unless standardAttributes.include?(key)
