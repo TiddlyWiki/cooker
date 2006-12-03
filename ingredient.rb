@@ -1,3 +1,5 @@
+# ingredient.rb
+
 require 'cgi'
 require 'tiddler'
 
@@ -42,6 +44,8 @@ class Ingredient
 			else
 				return to_s_tiddler
 			end
+		elsif (subtype[0] == "shadow")
+			return to_s_retiddle
 		else
 			return to_s_line
 		end
@@ -55,18 +59,17 @@ protected
 			infile.each_line do |line|
 				contents << line unless line.strip =~ /^\/\/#/
 			end
-			tiddler.set(@title, @author, created(infile), modified(infile), @tags, @extendedAttributes, contents)
-			return tiddler.to_div + "\n"
+			tiddler.set(@title, @modifier, created(infile), modified(infile), @tags, @extendedAttributes, contents)
+			return tiddler.to_div
 		end
 	end
 	
 	def to_s_retiddle
 		File.open(@filename) do |infile|
 			tiddler= Tiddler.new
-			infile.each_line do |line|
-				tiddler.from_div(line)
-			end
-			return tiddler.to_div + "\n"
+			line = infile.gets
+			tiddler.read_div(infile,line)
+			return tiddler.to_div
 		end
 	end
 	
@@ -83,8 +86,10 @@ protected
 	def parseAttributes(attributes)
 		for i in 0...attributes.length
 			line = attributes[i]
-			key = line[0, line.index(':')].strip
-			value = line[(line.index(':') + 1)...line.length].strip
+			c = line.index(':')
+			next if(c==nil)
+			key = line[0, c].strip
+			value = line[(c + 1)...line.length].strip
 			case key
 				when "title"
 					@title = value
@@ -92,10 +97,8 @@ protected
 					@title = value
 				when "tags"
 					@tags = value
-				when "author"
-					@author = value
 				when "modifier"
-					@author = value
+					@modifier = value
 				when "tiddle"
 					@tiddle = true
 				when "modified"
@@ -120,7 +123,7 @@ protected
 		@title ||= @filename
 	end
 
-	def author
-		@author ||= ""
+	def modifier
+		@modifier ||= ""
 	end
 end
