@@ -8,8 +8,9 @@ class Splitter
 		dirset = false
 		dirnum = 0;
 		while !dirset do
-			if !File.exists?(@filename + "." + dirnum.to_s)
-				@dirname = @filename + "." + dirnum.to_s
+			targetdir = @filename + "." + dirnum.to_s
+			if !File.exists?(targetdir)
+				@dirname = targetdir
 				Dir.mkdir(@dirname)
 				dirset = true
 			else
@@ -22,7 +23,7 @@ class Splitter
 		tiddlerCount = 0
 		File.open(@filename) do |file|
 			start = false
-			File.open(@dirname + "/split.recipe", File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
+			File.open(File.join(@dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
 				file.each_line do |line|
 					start = true if line =~ /<div id="storeArea">/
 					line = line.sub(/.*<div id="storeArea">/, "").strip
@@ -46,16 +47,16 @@ private
 	def writeTiddler(tiddler, recipefile)
 		tiddlerFilename = tiddler.title.to_s.gsub(/[\/:\?#\*<> ]/, "_")
 		if(tiddler.tags =~ /systemConfig/)
-			tiddlerFilename += ".js"
-			File.open(@dirname + "/" + tiddlerFilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+			targetfile = File.join(@dirname, tiddlerFilename += ".js")
+			File.open(targetfile, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
 				out << tiddler.contents
 			end
-			File.open(@dirname + "/" + tiddlerFilename + ".meta", File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+			File.open(targetfile + ".meta", File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
 				out << tiddler.to_meta
 			end
 		else
-			tiddlerFilename += ".tiddler"
-			File.open(@dirname + "/" + tiddlerFilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+			targetfile = File.join(@dirname, tiddlerFilename += ".tiddler")
+			File.open(targetfile, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
 				out << tiddler.to_div
 			end
 		end
