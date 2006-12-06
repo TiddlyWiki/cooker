@@ -3,14 +3,14 @@
 require 'tiddler'
 
 class Splitter
-	def initialize(filename)
+	def initialize(filename, outdir=nil)
 		@filename = filename
 		dirset = false
 		dirnum = 0;
+		dirname = outdir.nil? || outdir.empty? ? @filename : File.join(outdir, File.basename(@filename))
 		while !dirset do
-			targetdir = @filename + "." + dirnum.to_s
-			if !File.exists?(targetdir)
-				@dirname = targetdir
+			@dirname = dirname + "." + dirnum.to_s
+			if !File.exists?(@dirname)
 				Dir.mkdir(@dirname)
 				dirset = true
 			else
@@ -37,9 +37,9 @@ class Splitter
 			end
 		end
 		if(tiddlerCount == 0)
-			puts "#{@filename} does not contain any tiddlers"
+			puts "'#{@filename}' does not contain any tiddlers"
 		else
-			puts "\n#{@filename} processed, #{tiddlerCount.to_s} tiddlers written to #{@dirname}/"
+			puts "\n'#{@filename}' processed, #{tiddlerCount.to_s} tiddlers written to '#{@dirname}'"
 		end
 	end
 
