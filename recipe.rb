@@ -6,7 +6,7 @@ require "ftools"
 class Recipe
 	def initialize(filename, outdir=nil)
 		@filename = filename
-		@outdir = outdir ||= ""
+		@outdir = outdir
 		@ingredients = Array.new
 		@addons = Hash.new
 		File.open(filename) do |file|
@@ -15,9 +15,9 @@ class Recipe
 	end
 	
 	def cook
-		puts "Creating file: " + outfile
+		puts "Creating file: " + outfilename
 		if(@ingredients.length > 0)
-			File.open(outfile, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+			File.open(outfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
 				@ingredients.each do |ingredient|
 					if ingredient.type == "list"
 						if @addons.has_key?(ingredient.filename)
@@ -34,11 +34,11 @@ class Recipe
 	
 protected
 	def outdir
-		@outdir.empty? ? "" : File.join(@outdir, "")
+		outdir ||= ""
 	end
 	
-	def outfile
-		outdir + File.basename(@filename.sub(".recipe", ""))
+	def outfilename
+		@outdir + File.basename(@filename.sub(".recipe", ""))
 	end
 	
 	def ingredients
@@ -55,15 +55,15 @@ protected
 		elsif line =~ /@.*@/
 			@ingredients << Ingredient.new(line.strip.slice(1..-2), "list")
 		elsif line =~ /recipe\:/
-			loadSubrecipe(File.join(dirname, line.sub(/recipe\:/, "").strip))
+			loadSubrecipe(dirname + "/" + line.sub(/recipe\:/, "").strip)
 		elsif line =~ /\:/
 			entry = line.split(':')
 			key = entry.shift.strip
-			file = File.join(dirname, entry.shift.strip)
+			file = dirname + "/" + entry.shift.strip
 			addAddOns(key, file, entry)
 			loadSubrecipe(file + ".deps") if File.exists?(file + ".deps")
 		else
-			file = File.join(dirname, line.chomp)
+			file = dirname + "/" + line.chomp
 			@ingredients << Ingredient.new(file, "line")
 			loadSubrecipe(file + ".deps") if File.exists?(file + ".deps")
 		end
@@ -95,6 +95,6 @@ protected
 	
 	def copyFile(ingredient)
 		puts "Copying: " + ingredient.filename
-		File.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename)))
+		File.copy(ingredient.filename, @outdir + File.basename(ingredient.filename))
 	end
 end

@@ -58,12 +58,11 @@ class Tiddler
 		@tags = parseAttribute(divText, "tags")
 		parseExtendedAttributes(divText)
 		if(@usePre)
-	    divRE = Regexp.new('<div.*?>\s*?<pre>(.*?)</pre>\s*?</div>', Regexp::MULTILINE)
-	    @contents = CGI::unescapeHTML(divRE.match(divText)[1].sub("\r", ""))
+			@contents = divText.sub(/<div.*?>\n<pre>/, "").sub(/<\/pre>\n<\/div>/, "")
 		else
-			divRE = Regexp.new('<div.*?>(.*)</div>')
-			@contents = CGI::unescapeHTML(divRE.match(divText)[1].gsub("\\n", "\n").gsub("\\s", "\\").sub("\r", ""))
+			@contents = divText.sub(/<div.*?>/, "").sub("</div>", "").gsub("\\n", "\n").gsub("\\s", "\\")
 		end
+		@contents = CGI::unescapeHTML(@contents.gsub("\r", ""))
 	end
 	
 	def to_div
