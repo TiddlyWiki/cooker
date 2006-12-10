@@ -10,31 +10,35 @@ $BUILD = "$Revision$"
 
 class Optparse
 	def self.parse(args)
+		version = "Version: #{$VERSION} (#{$BUILD.gsub('$', '').strip})"
+		
 		options = OpenStruct.new
+		options.help = ""
 		options.dest = ""
-		options.hashid = false
 		
 		opts = OptionParser.new do |opts|
-			opts.banner = "Cooker Build: " + $BUILD + ", Version: " + $VERSION + "\nUsage: cook.rb recipename [options]"
+			opts.banner = "Cook #{version}\n"
+			opts.banner += "Usage: cook.rb recipename [...] [options]"
 			opts.separator ""
 			opts.separator "Specific options:"
 			
-			opts.on("-d", "--dest [DESTINATION]", "Destination directory") do |dest|
+			opts.on("-d", "--dest DESTINATION", "Destination directory") do |dest|
 				if(!File.exist?(dest))
-					STDERR.puts("Error: destination directory: " + dest + " does not exist.")
+					STDERR.puts("ERROR - Destination directory '#{dest}' does not exist.")
 					exit
 				end
 				options.dest = dest
 			end
 			
-			opts.on("-i", "--hashid", "Add hash id to all tiddlers") do |i|
-				options.hashid = i
+			options.help = opts
+			
+			opts.on_tail("-h", "--help", "Show this message") do
+				puts options.help
+				exit 64
 			end
 			
-			# No argument, shows at tail. This will print an options summary.
-			# Try it and see!
-			opts.on_tail("-h", "--help", "Show this message") do
-				puts opts
+			opts.on_tail("--version", "Show version") do
+				puts version
 				exit 64
 			end
 		end
@@ -45,9 +49,14 @@ end
 
 options = Optparse.parse(ARGV)
 
+if(ARGV.empty?)
+	puts options.help
+	exit
+end
+
 ARGV.each do |file|
 	if(!File.exist?(file))
-		STDERR.puts("ERROR, File: " + file + " Does not exist.")
+		STDERR.puts("ERROR - File '#{file}' does not exist.")
 		exit
 	end
 end
