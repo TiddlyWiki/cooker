@@ -3,13 +3,14 @@
 require 'tiddler'
 
 class Splitter
-	def initialize(filename)
+	def initialize(filename, outdir=nil)
 		@filename = filename
 		dirset = false
 		dirnum = 0;
+		dirname = outdir.nil? || outdir.empty? ? @filename : File.join(outdir, File.basename(@filename))
 		while !dirset do
-			if !File.exists?(@filename + "." + dirnum.to_s)
-				@dirname = @filename + "." + dirnum.to_s
+			@dirname = dirname + "." + dirnum.to_s
+			if !File.exists?(@dirname)
 				Dir.mkdir(@dirname)
 				dirset = true
 			else
@@ -22,23 +23,28 @@ class Splitter
 		tiddlerCount = 0
 		File.open(@filename) do |file|
 			start = false
-			File.open(@dirname + "/split.recipe", File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
-				file.each_line do |line|
-					start = true if line =~ /<div id="storeArea">/
-					line = line.sub(/.*<div id="storeArea">/, "").strip
-					if(start && line =~ /<div tiddler=.*<\/div>/)
+			File.open(File.join(@dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
+				line = file.gets
+				begin
+					line = file.gets
+				end while(line && line !~ /<div id="storeArea">/)
+				line = line.sub(/.*<div id="storeArea">/, "").strip
+				begin
+					if(line =~ /<div ti.*/)
 						tiddlerCount += 1
 						tiddler = Tiddler.new
-						tiddler.from_div(line)
+						line = tiddler.read_div(file,line)
 						writeTiddler(tiddler, recipefile)
+					else
+						line = file.gets
 					end
-				end
+				end while(line && line !~ /<!--STORE-AREA-END-->/)
 			end
 		end
 		if(tiddlerCount == 0)
-			puts "#{@filename} does not contain any tiddlers"
+			puts "'#{@filename}' does not contain any tiddlers"
 		else
-			puts "\n#{@filename} processed, #{tiddlerCount.to_s} tiddlers written to #{@dirname}/"
+			puts "\n'#{@filename}' processed, #{tiddlerCount.to_s} tiddlers written to '#{@dirname}'"
 		end
 	end
 
@@ -46,16 +52,16 @@ private
 	def writeTiddler(tiddler, recipefile)
 		tiddlerFilename = tiddler.title.to_s.gsub(/[\/:\?#\*<> ]/, "_")
 		if(tiddler.tags =~ /systemConfig/)
-			tiddlerFilename += ".js"
-			File.open(@dirname + "/" + tiddlerFilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+			targetfile = File.join(@dirname, tiddlerFilename += ".js")
+			File.open(targetfile, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
 				out << tiddler.contents
 			end
-			File.open(@dirname + "/" + tiddlerFilename + ".meta", File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+			File.open(targetfile + ".meta", File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
 				out << tiddler.to_meta
 			end
 		else
-			tiddlerFilename += ".tiddler"
-			File.open(@dirname + "/" + tiddlerFilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+			targetfile = File.join(@dirname, tiddlerFilename += ".tiddler")
+			File.open(targetfile, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
 				out << tiddler.to_div
 			end
 		end

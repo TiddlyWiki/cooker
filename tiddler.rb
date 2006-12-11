@@ -4,8 +4,10 @@ require 'cgi'
 class Tiddler
 	def initialize
 		@usePre = false
+		@optimizeAttributeStorage = false
 		@extendedAttributes = Hash.new
 	end
+
 	attr_accessor :usePre
 	attr_reader :title
 	attr_reader :modifier
@@ -13,7 +15,7 @@ class Tiddler
 	attr_reader :modified
 	attr_reader :tags
 	attr_reader :contents
-
+	attr_accessor :optimizeAttributeStorage
 	def extendedAttribute(name)
 		return @extendedAttributes[name]
 	end
@@ -30,7 +32,7 @@ class Tiddler
 
 	def read_div(file,line)
 		divText = ""
-		if line =~ /<div tiddler=.*<\/div>/
+		if(line =~ /<div tiddler=.*<\/div>/)
 			@usePre = false
 			divText = line
 			line = file.gets
@@ -39,7 +41,7 @@ class Tiddler
 			begin
 				divText << line
 				line = file.gets
-			end while line && line !~ /<div ti/
+			end while line && line !~ /<div ti/ && line !~ /<\/div>/
 		end
 		from_div(divText)
 		return line
@@ -58,9 +60,9 @@ class Tiddler
 		@tags = parseAttribute(divText, "tags")
 		parseExtendedAttributes(divText)
 		if(@usePre)
-			@contents = divText.sub(/<div.*?>\n<pre>/, "").sub(/<\/pre>\n<\/div>/, "")
+			@contents = divText.sub(/<div.*?>\n<pre>/, "").sub(/<\/pre>\n<\/div>\n*/, "")
 		else
-			@contents = divText.sub(/<div.*?>/, "").sub("</div>", "").gsub("\\n", "\n").gsub("\\s", "\\")
+			@contents = divText.sub(/<div.*?>/, "").sub(/<\/div>\n*/, "").gsub("\\n", "\n").gsub("\\s", "\\")
 		end
 		@contents = CGI::unescapeHTML(@contents.gsub("\r", ""))
 	end
@@ -69,9 +71,15 @@ class Tiddler
 		out = "<div "
 		out << (@usePre ? "title=\"#{@title}\"" : "tiddler=\"#{@title}\"")
 		out << " modifier=\"#{@modifier}\"" if @modifier
-		out << " created=\"#{@created}\"" if @created
-		out << " modified=\"#{@modified}\"" if @modified && @modified != @created
-		out << " tags=\"#{@tags}\"" if @tags
+		if(@usePre || @optimizeAttributeStorage)
+			out << " created=\"#{@created}\"" if @created
+			out << " modified=\"#{@modified}\"" if @modified && @modified != @created
+			out << " tags=\"#{@tags}\"" if @tags
+		else
+			out << " modified=\"#{@modified}\"" if @modified
+			out << " created=\"#{@created}\"" if @created
+			out << " tags=\"#{@tags}\""
+		end
 		@extendedAttributes.each_pair { |key, value| out << " #{key}=\"#{value}\"" }
 		out << ">"
 		if(@usePre)

@@ -17,15 +17,23 @@ class Ingredient
 		end
 		parseAttributes(attributes) if attributes
 	end
-	
+
 	def Ingredient.hashid
 		@@hashid
 	end
-	
+
 	def Ingredient.hashid=(hashid)
 		@@hashid = hashid
 	end
 	
+	def Ingredient.format
+		@@format
+	end
+
+	def Ingredient.format=(format)
+		@@format = format
+	end
+
 	def filename
 		@filename
 	end
@@ -40,12 +48,12 @@ class Ingredient
 		if subtype[0] == "list"
 		elsif (subtype[0] == "tiddler")
 			if(@filename =~ /\.tiddler/)
-				return to_s_retiddle
+				return to_s_retiddle(subtype[0])
 			else
 				return to_s_tiddler
 			end
 		elsif (subtype[0] == "shadow")
-			return to_s_retiddle
+			return to_s_retiddle(subtype[0])
 		else
 			return to_s_line
 		end
@@ -64,11 +72,14 @@ protected
 		end
 	end
 	
-	def to_s_retiddle
+	def to_s_retiddle(subtype)
 		File.open(@filename) do |infile|
 			tiddler= Tiddler.new
 			line = infile.gets
 			tiddler.read_div(infile,line)
+			tiddler.optimizeAttributeStorage = true if(subtype=="shadow")
+			tiddler.usePre = true if(subtype=="shadow" && @@format =~ /preshadow/)
+			tiddler.usePre = true if(subtype=="tiddler" && @@format =~ /pretiddler/)
 			return tiddler.to_div
 		end
 	end
