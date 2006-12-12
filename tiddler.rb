@@ -60,7 +60,7 @@ class Tiddler
 		@tags = parseAttribute(divText, "tags")
 		parseExtendedAttributes(divText)
 		if(@usePre)
-			@contents = divText.sub(/<div.*?>\n<pre>/, "").sub(/<\/pre>\n<\/div>\n*/, "")
+			@contents = divText.sub(/<div.*?>\n*<pre>/, "").sub(/<\/pre>\n*/, "").sub(/<\/div>\n*/, "")
 		else
 			@contents = divText.sub(/<div.*?>/, "").sub(/<\/div>\n*/, "").gsub("\\n", "\n").gsub("\\s", "\\")
 		end
@@ -87,7 +87,8 @@ class Tiddler
 			lines = (CGI::escapeHTML(@contents).gsub("\r", "")).split("\n")
 			last = lines.pop
 			lines.each { |line| out << line << "\n" }
-			out << last << "</pre>\n"
+			out << last if last
+			out << "</pre>\n"
 		else
 			@contents.each { |line| out << CGI::escapeHTML(line).gsub("\\", "\\s").sub("\n", "\\n").sub("\r", "") }
 		end
