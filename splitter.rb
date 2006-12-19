@@ -38,7 +38,7 @@ class Splitter
 					else
 						line = file.gets
 					end
-				end while(line && line !~ /<!--STORE-AREA-END-->/)
+				end while(line && line !~ /<!--STORE-AREA-END-->/ && line !~ /<!--POST-BODY-START-->/ && line !~ /<div id="shadowArea">/)
 			end
 		end
 		if(tiddlerCount == 0)

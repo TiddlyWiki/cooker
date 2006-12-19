@@ -118,14 +118,12 @@ protected
 	def parseExtendedAttributes(divText)
 		return if !divText
 		standardAttributes = [ "tiddler", "title", "modifier", "modified", "created", "tags" ]
-		attributesRE = Regexp.new('<div (.*)>.*</div>')
-		attributeRE = Regexp.new('([^\s\t]*)="([^"]*)"')
-		match = attributesRE.match(divText)
+		match = /<div (.*)>/.match(divText)
 		return if !match
-		attributes = match[1].to_s.split(attributeRE)
+		attributes = match[1].to_s.split(/([^\s\t]*)="([^"]*)"/)
 		0.step(attributes.size - 1, 3) do |i|
 			key, value = attributes[i + 1], attributes[i + 2]
-			@extendedAttributes.store(key, value) unless standardAttributes.include?(key)
+			@extendedAttributes.store(key, value) if key && !standardAttributes.include?(key)
 		end
 	end
 end
