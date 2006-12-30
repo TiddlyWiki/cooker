@@ -16,6 +16,7 @@ class Tiddler
 	attr_reader :tags
 	attr_reader :contents
 	attr_accessor :optimizeAttributeStorage
+
 	def extendedAttribute(name)
 		return @extendedAttributes[name]
 	end
@@ -30,7 +31,7 @@ class Tiddler
 		@contents = contents
 	end
 
-	def read_div(file,line)
+	def read_div(file, line)
 		divText = ""
 		if(line =~ /<div tiddler=.*<\/div>/)
 			@usePre = false
@@ -66,18 +67,18 @@ class Tiddler
 		end
 		@contents = CGI::unescapeHTML(@contents.gsub("\r", ""))
 	end
-	
+
 	def to_div
 		out = "<div "
 		out << (@usePre ? "title=\"#{@title}\"" : "tiddler=\"#{@title}\"")
-		out << " modifier=\"#{@modifier}\"" if @modifier
+		out << " modifier=\"#{@modifier}\"" if(@modifier)
 		if(@usePre || @optimizeAttributeStorage)
-			out << " created=\"#{@created}\"" if @created
-			out << " modified=\"#{@modified}\"" if @modified && @modified != @created
-			out << " tags=\"#{@tags}\"" if @tags
+			out << " created=\"#{@created}\"" if(@created)
+			out << " modified=\"#{@modified}\"" if(@modified && @modified != @created)
+			out << " tags=\"#{@tags}\"" if(@tags)
 		else
-			out << " modified=\"#{@modified}\"" if @modified
-			out << " created=\"#{@created}\"" if @created
+			out << " modified=\"#{@modified}\"" if(@modified)
+			out << " created=\"#{@created}\"" if(@created)
 			out << " tags=\"#{@tags}\""
 		end
 		@extendedAttributes.each_pair { |key, value| out << " #{key}=\"#{value}\"" }
@@ -87,14 +88,14 @@ class Tiddler
 			lines = (CGI::escapeHTML(@contents).gsub("\r", "")).split("\n")
 			last = lines.pop
 			lines.each { |line| out << line << "\n" }
-			out << last if last
+			out << last if(last)
 			out << "</pre>\n"
 		else
 			@contents.each { |line| out << CGI::escapeHTML(line).gsub("\\", "\\s").sub("\n", "\\n").sub("\r", "") }
 		end
 		out << "</div>\n"
 	end
-	
+
 	def to_meta
 		out = "title: #{@title}\n"
 		out << "modifier: #{@modifier}\n"
@@ -106,7 +107,7 @@ class Tiddler
 		end
 		return out
 	end
-	
+
 protected
 	def parseAttribute(divText, attribute)
 		exp = Regexp.new(Regexp.escape(attribute) + '="([^"]+)"')
@@ -116,14 +117,14 @@ protected
 	end
 
 	def parseExtendedAttributes(divText)
-		return if !divText
+		return if(!divText)
 		standardAttributes = [ "tiddler", "title", "modifier", "modified", "created", "tags" ]
 		match = /<div (.*)>/.match(divText)
-		return if !match
+		return if(!match)
 		attributes = match[1].to_s.split(/([^\s\t]*)="([^"]*)"/)
 		0.step(attributes.size - 1, 3) do |i|
 			key, value = attributes[i + 1], attributes[i + 2]
-			@extendedAttributes.store(key, value) if key && !standardAttributes.include?(key)
+			@extendedAttributes.store(key, value) if(key && !standardAttributes.include?(key))
 		end
 	end
 end

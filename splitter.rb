@@ -10,7 +10,7 @@ class Splitter
 		dirname = outdir.nil? || outdir.empty? ? @filename : File.join(outdir, File.basename(@filename))
 		while !dirset do
 			@dirname = dirname + "." + dirnum.to_s
-			if !File.exists?(@dirname)
+			if(!File.exists?(@dirname))
 				Dir.mkdir(@dirname)
 				dirset = true
 			else
