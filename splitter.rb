@@ -1,10 +1,12 @@
 # spliter.rb
 
 require 'tiddler'
+require 'iconv'
 
 class Splitter
-	def initialize(filename, outdir=nil)
+	def initialize(filename, outdir=nil, charset="ISO-8859-1")
 		@filename = filename
+		@conv = Iconv.new(charset,"UTF-8")
 		dirset = false
 		dirnum = 0;
 		dirname = outdir.nil? || outdir.empty? ? @filename : File.join(outdir, File.basename(@filename))
@@ -51,6 +53,7 @@ class Splitter
 private
 	def writeTiddler(tiddler, recipefile)
 		tiddlerFilename = tiddler.title.to_s.gsub(/[\/:\?#\*<> ]/, "_")
+		tiddlerFilename = @conv.iconv(tiddlerFilename)
 		if(tiddler.tags =~ /systemConfig/)
 			targetfile = File.join(@dirname, tiddlerFilename += ".js")
 			File.open(targetfile, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|

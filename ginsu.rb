@@ -15,6 +15,7 @@ class Optparse
 		options = OpenStruct.new
 		options.help = ""
 		options.dest = ""
+		options.charset = ""
 
 		opts = OptionParser.new do |opts|
 			opts.banner = "Ginsu #{version}\n"
@@ -30,6 +31,10 @@ class Optparse
 				options.dest = dest
 			end
 
+			opts.on_tail("-c", "--charset CHARSET", "Character set of filesystem.") do |charset|
+				options.charset = charset
+			end
+			
 			options.help = opts
 
 			opts.on_tail("-h", "--help", "Show this message") do
@@ -62,6 +67,6 @@ ARGV.each do |file|
 end
 
 ARGV.each do |file|
-	splitter = Splitter.new(file, options.dest)
+	splitter = Splitter.new(file, options.dest, options.charset)
 	splitter.split
 end
