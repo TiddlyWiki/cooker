@@ -61,9 +61,9 @@ class Tiddler
 		@tags = parseAttribute(divText, "tags")
 		parseExtendedAttributes(divText)
 		if(@usePre)
-			@contents = divText.sub(/<div.*?>\n*<pre>/, "").sub(/<\/pre>\n*/, "").sub(/<\/div>\n*/, "")
+			@contents = divText.sub(/<div.*?>[\n\r]*<pre>/, "").sub(/<\/pre>[\n\r]*/, "").sub(/<\/div>[\n\r]*/, "")
 		else
-			@contents = divText.sub(/<div.*?>/, "").sub(/<\/div>\n*/, "").gsub("\\n", "\n").gsub("\\s", "\\")
+			@contents = divText.sub(/<div.*?>/, "").sub(/<\/div>[\n\r]*/, "").gsub("\\n", "\n").gsub("\\s", "\\")
 		end
 		@contents = CGI::unescapeHTML(@contents.gsub("\r", ""))
 	end

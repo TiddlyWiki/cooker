@@ -34,7 +34,7 @@ class Recipe
 
 protected
 	def outdir
-		@outdir.empty? ? "" : File.join(@outdir, "")
+		@outdir.empty? ? "." : File.join(@outdir, "")
 	end
 
 	def outfilename
