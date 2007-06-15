@@ -5,7 +5,7 @@ require 'recipe'
 require 'optparse'
 require 'ostruct'
 
-$VERSION = "0.9.4"
+$VERSION = "1.0.0"
 $BUILD = "$Revision$"
 
 class Optparse
