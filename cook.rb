@@ -5,7 +5,7 @@ require 'recipe'
 require 'optparse'
 require 'ostruct'
 
-$VERSION = "1.0.0"
+$VERSION = "1.0.1"
 $BUILD = "$Revision$"
 
 class Optparse
@@ -65,7 +65,6 @@ ARGV.each do |file|
 	end
 end
 
-Ingredient.hashid = options.hashid
 Ingredient.format = options.format
 
 ARGV.each do |file|

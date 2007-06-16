@@ -6,6 +6,8 @@ class Tiddler
 		@usePre = false
 		@optimizeAttributeStorage = false
 		@extendedAttributes = Hash.new
+		@standardAttributeNames = [ "tiddler", "title", "modifier", "modified", "created", "tags" ]
+		@sliceAttributeNames = ["Name","Description","Version","Requires","CoreVersion","Date","Source","Author","License","Browsers"]
 	end
 
 	attr_accessor :usePre
@@ -15,6 +17,8 @@ class Tiddler
 	attr_reader :modified
 	attr_reader :tags
 	attr_reader :contents
+	attr_reader :standardAttributeNames
+	attr_reader :sliceAttributeNames
 	attr_accessor :optimizeAttributeStorage
 
 	def extendedAttribute(name)
@@ -29,6 +33,54 @@ class Tiddler
 		@tags = tags.strip
 		@extendedAttributes = extendedAttributes
 		@contents = contents
+	end
+
+
+	def load(filename)
+		if(File.exists?(filename + ".meta"))
+			File.open(filename + ".meta") do |infile|
+				infile.each_line do |line|
+					c = line.index(':')
+					if(c != nil)
+						key = line[0, c].strip
+						value = line[(c + 1)...line.length].strip
+						case key
+						when "title"
+							@title = value
+						when "tiddler"
+							@title = value
+						when "modifier"
+							@modifier = value
+						when "created"
+							@created = value
+						when "modified"
+							@modified = value
+						when "tags"
+							@tags = value
+						else
+							@extendedAttributes[key] = value
+						end
+					end
+				end
+			end
+		end
+		File.open(filename) do |infile|
+			@contents = ""
+			infile.each_line do |line|
+				@contents << line unless(line.strip =~ /^\/\/#/)
+			end
+			@created ||= infile.mtime.strftime("%Y%m%d%M%S")
+			@modified ||= infile.ctime.strftime("%Y%m%d%M%S")
+		end
+		@title ||= filename
+	end
+
+	def loadDiv(filename)
+		File.open(filename) do |infile|
+			line = infile.gets
+			read_div(infile, line)
+			optimizeAttributeStorage = true if(subtype == "shadow")
+		end
 	end
 
 	def read_div(file, line)

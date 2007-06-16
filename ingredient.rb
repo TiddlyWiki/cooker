@@ -4,26 +4,21 @@ require 'cgi'
 require 'tiddler'
 
 class Ingredient
-	@@hashid = false
 
 	def initialize(filename, type, attributes=nil)
 		@filename = filename
 		@type = type
 		@extendedAttributes = Hash.new
-		if(File.exists?(filename + ".meta"))
-			File.open(filename + ".meta") do |file|
-				file.each_line { |line| attributes.unshift(line.strip) }
+		@sliceAttributes = Hash.new
+		if(type == "tline")
+		else
+			if(File.exists?(filename + ".meta"))
+				File.open(filename + ".meta") do |file|
+					file.each_line { |line| attributes.unshift(line.strip) }
+				end
 			end
 		end
 		parseAttributes(attributes) if(attributes)
-	end
-
-	def Ingredient.hashid
-		@@hashid
-	end
-
-	def Ingredient.hashid=(hashid)
-		@@hashid = hashid
 	end
 
 	def Ingredient.format
@@ -45,7 +40,10 @@ class Ingredient
 	def to_s
 		#"to_s_#{@type}".to_sym
 		subtype = type.split('.')
-		if(subtype[0] == "list")
+
+		if(@type == "tline")
+			return @filename
+		elsif(subtype[0] == "list")
 		elsif(subtype[0] == "tiddler")
 			if(@filename =~ /\.tiddler/)
 				return to_s_retiddle(subtype[0])
@@ -54,6 +52,8 @@ class Ingredient
 			end
 		elsif(subtype[0] == "shadow")
 			return to_s_retiddle(subtype[0])
+		elsif(subtype[0] == "plugin")
+			return to_s_plugin
 		else
 			return to_s_line
 		end
@@ -68,6 +68,42 @@ protected
 				contents << line unless(line.strip =~ /^\/\/#/)
 			end
 			tiddler.set(@title, @modifier, created(infile), modified(infile), @tags, @extendedAttributes, contents)
+			tiddler.usePre = true;
+			return tiddler.to_div
+		end
+	end
+
+	def to_s_plugin
+		File.open(@filename) do |infile|
+			tiddler = Tiddler.new
+			header = "/***\n"
+			keyList = tiddler.sliceAttributeNames
+			keyList.each do |key|
+				out = key
+				value = @sliceAttributes[key]
+				if(out == "CoreVersion" || out == "CodeRepository")
+					out = "~" + out
+				end
+				header << "|''#{out}:''|#{value}|\n" if(value)
+			end
+
+			header << "***/\n//{{{\n"
+			sliceName = @sliceAttributes["Name"]
+			if(sliceName)
+				header << "if(!version.extensions.#{sliceName}) {\n" 
+				header << "version.extensions.#{sliceName} = {installed:true};\n\n"
+				footer = "\n}\n//}}}\n"
+			else
+				footer = "\n//}}}\n"
+			end
+
+			contents = header
+			infile.each_line do |line|
+				contents << line unless(line.strip =~ /^\/\/#/)
+			end
+			contents << footer
+			tiddler.set(@title, @modifier, created(infile), modified(infile), @tags, @extendedAttributes, contents)
+			tiddler.usePre = true;
 			return tiddler.to_div
 		end
 	end
@@ -101,23 +137,32 @@ protected
 			next if(c == nil)
 			key = line[0, c].strip
 			value = line[(c + 1)...line.length].strip
-			case key
+			tiddler = Tiddler.new
+			key2 = key
+			k = key.index('.')
+			if(k != nil)
+				key2 = key[(k + 1)...key.length]
+			end
+			sliceAttributeNames = tiddler.sliceAttributeNames
+			if(sliceAttributeNames.include?(key2))
+				@sliceAttributes[key2] = value
+			else
+				case key
 				when "title"
 					@title = value
 				when "tiddler"
 					@title = value
-				when "tags"
-					@tags = value
 				when "modifier"
 					@modifier = value
-				when "tiddle"
-					@tiddle = true
-				when "modified"
-					@modified = value
 				when "created"
 					@created = value
+				when "modified"
+					@modified = value
+				when "tags"
+					@tags = value
 				else
 					@extendedAttributes[key] = value
+				end
 			end
 		end
 	end

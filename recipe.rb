@@ -4,13 +4,13 @@ require 'ingredient'
 require "ftools"
 
 class Recipe
-	def initialize(filename, outdir=nil)
+	def initialize(filename, outdir=nil, isTemplate=false)
 		@filename = filename
 		@outdir = outdir ||= ""
 		@ingredients = Array.new
 		@addons = Hash.new
 		File.open(filename) do |file|
-			file.each_line { |line| genIngredient(File.dirname(filename), line) }
+			file.each_line { |line| genIngredient(File.dirname(filename), line, isTemplate) }
 		end
 	end
 
@@ -34,7 +34,7 @@ class Recipe
 
 protected
 	def outdir
-		@outdir.empty? ? "." : File.join(@outdir, "")
+		@outdir.empty? ? "" : File.join(@outdir, "")
 	end
 
 	def outfilename
@@ -49,28 +49,39 @@ protected
 		@addons
 	end
 
-	def genIngredient(dirname, line)
-		if(line.strip == "")
-			return
-		elsif(line =~ /@.*@/)
-			@ingredients << Ingredient.new(line.strip.slice(1..-2), "list")
-		elsif(line =~ /recipe\:/)
-			loadSubrecipe(File.join(dirname, line.sub(/recipe\:/, "").strip))
-		elsif(line =~ /\:/)
-			entry = line.split(':')
-			key = entry.shift.strip
-			file = File.join(dirname, entry.shift.strip)
-			addAddOns(key, file, entry)
-			loadSubrecipe(file + ".deps") if File.exists?(file + ".deps")
+	def genIngredient(dirname, line, isTemplate)
+		if(isTemplate)
+			if(line =~ /<!--@@.*@@-->/)
+				@ingredients << Ingredient.new(line.strip.slice(6..-6), "list")
+			else
+				@ingredients << Ingredient.new(line, "tline")
+			end
 		else
-			file = File.join(dirname, line.chomp)
-			@ingredients << Ingredient.new(file, "line")
-			loadSubrecipe(file + ".deps") if(File.exists?(file + ".deps"))
+			if(line.strip == "")
+				return
+			end
+			if(line =~ /@.*@/)
+				@ingredients << Ingredient.new(line.strip.slice(1..-2), "list")
+			elsif(line =~ /template\:/)
+				loadSubrecipe(File.join(dirname, line.sub(/template\:/, "").strip),true)
+			elsif(line =~ /recipe\:/)
+				loadSubrecipe(File.join(dirname, line.sub(/recipe\:/, "").strip),false)
+			elsif(line =~ /\:/)
+				entry = line.split(':')
+				key = entry.shift.strip
+				file = File.join(dirname, entry.shift.strip)
+				addAddOns(key, file, entry)
+				loadSubrecipe(file + ".deps",false) if File.exists?(file + ".deps")
+			else
+				file = File.join(dirname, line.chomp)
+				@ingredients << Ingredient.new(file, "line")
+				loadSubrecipe(file + ".deps",false) if(File.exists?(file + ".deps"))
+			end
 		end
 	end
 
-	def loadSubrecipe(subrecipename)
-		recipe = Recipe.new(subrecipename)
+	def loadSubrecipe(subrecipename, isTemplate)
+		recipe = Recipe.new(subrecipename, @outdir, isTemplate)
 		@ingredients = @ingredients + recipe.ingredients
 		recipe.addons.each { |key, value| addAddOns(key, value) }
 	end
@@ -89,7 +100,9 @@ protected
 	end
 
 	def writeToDish(outfile, ingredient)
-		puts "Writing: " + ingredient.filename
+		if(ingredient.type != "tline")
+			puts "Writing: " + ingredient.filename
+		end
 		outfile << ingredient
 	end
 
