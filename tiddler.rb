@@ -1,49 +1,63 @@
 # tiddler.rb
+
+# Copyright (c) UnaMesa Association 2004-2007
+# License: Creative Commons Attribution ShareAlike 3.0 License http://creativecommons.org/licenses/by-sa/3.0/
+
 require 'cgi'
 
 class Tiddler
 	def initialize
-		@usePre = false
-		@optimizeAttributeStorage = false
+		@usePre = true
 		@extendedAttributes = Hash.new
+		@sliceAttributes = Hash.new
 		@standardAttributeNames = [ "tiddler", "title", "modifier", "modified", "created", "tags" ]
-		@sliceAttributeNames = ["Name","Description","Version","Requires","CoreVersion","Date","Source","Author","License","Browsers"]
+		@sliceAttributeNames = ["Name","Description","Version","Requires","CoreVersion","Date","Source","Author","License","Browsers","CodeRepository"]
 	end
 
-	attr_accessor :usePre
+	def Tiddler.format
+		@@format
+	end
+
+	def Tiddler.format=(format)
+		@@format = format
+	end
+
 	attr_reader :title
 	attr_reader :modifier
 	attr_reader :created
 	attr_reader :modified
 	attr_reader :tags
 	attr_reader :contents
-	attr_reader :standardAttributeNames
-	attr_reader :sliceAttributeNames
-	attr_accessor :optimizeAttributeStorage
 
-	def extendedAttribute(name)
-		return @extendedAttributes[name]
+	def setAttributes(attributes)
+		tags = parseAddAttribute(attributes,"tags")
+		if(tags)
+			@tags = @tags + " " + tags
+			@tags = @tags.strip
+		end
+		tags = parseAttribute(attributes,"tags")
+		if(tags)
+			@tags = tags
+			@tags = @tags.strip
+		end
 	end
-
-	def set(title, modifier, created, modified, tags, extendedAttributes, contents)
-		@title = title.strip
-		@modifier = modifier.strip
-		@created = created.strip
-		@modified = modified.strip
-		@tags = tags.strip
-		@extendedAttributes = extendedAttributes
-		@contents = contents
-	end
-
 
 	def load(filename)
-		if(File.exists?(filename + ".meta"))
-			File.open(filename + ".meta") do |infile|
-				infile.each_line do |line|
-					c = line.index(':')
-					if(c != nil)
-						key = line[0, c].strip
-						value = line[(c + 1)...line.length].strip
+		# read in a tiddler from a .js and a .js.meta pair of files
+		File.open(filename + ".meta") do |infile|
+			infile.each_line do |line|
+				c = line.index(':')
+				if(c != nil)
+					key = line[0, c].strip
+					value = line[(c + 1)...line.length].strip
+					key2 = key
+					k = key.index('.')
+					if(k != nil)
+						key2 = key[(k + 1)...key.length]
+					end
+					if(@sliceAttributeNames.include?(key2))
+						@sliceAttributes[key2] = value
+					else
 						case key
 						when "title"
 							@title = value
@@ -70,16 +84,16 @@ class Tiddler
 				@contents << line unless(line.strip =~ /^\/\/#/)
 			end
 			@created ||= infile.mtime.strftime("%Y%m%d%M%S")
-			@modified ||= infile.ctime.strftime("%Y%m%d%M%S")
+			#@modified ||= infile.ctime.strftime("%Y%m%d%M%S")
 		end
 		@title ||= filename
 	end
 
 	def loadDiv(filename)
+		# read in tiddler from a .tiddler file
 		File.open(filename) do |infile|
 			line = infile.gets
 			read_div(infile, line)
-			optimizeAttributeStorage = true if(subtype == "shadow")
 		end
 	end
 
@@ -100,31 +114,14 @@ class Tiddler
 		return line
 	end
 
-	def from_div(divText)
-		@usePre = false
-		@title = parseAttribute(divText, "tiddler")
-		if(!@title)
-			@usePre = true;
-			@title = parseAttribute(divText, "title")
-		end
-		@modifier = parseAttribute(divText, "modifier")
-		@created = parseAttribute(divText, "created")
-		@modified = parseAttribute(divText, "modified")
-		@tags = parseAttribute(divText, "tags")
-		parseExtendedAttributes(divText)
-		if(@usePre)
-			@contents = divText.sub(/<div.*?>[\n\r]*<pre>/, "").sub(/<\/pre>[\n\r]*/, "").sub(/<\/div>[\n\r]*/, "")
-		else
-			@contents = divText.sub(/<div.*?>/, "").sub(/<\/div>[\n\r]*/, "").gsub("\\n", "\n").gsub("\\s", "\\")
-		end
-		@contents = CGI::unescapeHTML(@contents.gsub("\r", ""))
-	end
-
-	def to_div
+	def to_div(subtype="tiddler")
+		optimizeAttributeStorage = true if(subtype == "shadow")
+		@usePre = true if(subtype == "shadow" && @@format =~ /preshadow/)
+		@usePre = true if(subtype == "tiddler" && @@format =~ /pretiddler/)
 		out = "<div "
 		out << (@usePre ? "title=\"#{@title}\"" : "tiddler=\"#{@title}\"")
 		out << " modifier=\"#{@modifier}\"" if(@modifier)
-		if(@usePre || @optimizeAttributeStorage)
+		if(@usePre || optimizeAttributeStorage)
 			out << " created=\"#{@created}\"" if(@created)
 			out << " modified=\"#{@modified}\"" if(@modified && @modified != @created)
 			out << " tags=\"#{@tags}\"" if(@tags)
@@ -148,6 +145,31 @@ class Tiddler
 		out << "</div>\n"
 	end
 
+	def to_plugin
+		header = "/***\n"
+		@sliceAttributeNames.each do |key|
+			out = key
+			value = @sliceAttributes[key]
+			if(out == "CoreVersion" || out == "CodeRepository")
+				out = "~" + out
+			end
+			header << "|''#{out}:''|#{value}|\n" if(value)
+		end
+
+		header << "***/\n//{{{\n"
+		sliceName = @sliceAttributes["Name"]
+		if(sliceName)
+			header << "if(!version.extensions.#{sliceName}) {\n" 
+			header << "version.extensions.#{sliceName} = {installed:true};\n\n"
+			footer = "\n}\n//}}}\n"
+		else
+			footer = "\n//}}}\n"
+		end
+
+		@contents = header + @contents + footer
+		return to_div
+	end
+
 	def to_meta
 		out = "title: #{@title}\n"
 		out << "modifier: #{@modifier}\n"
@@ -161,6 +183,26 @@ class Tiddler
 	end
 
 protected
+	def from_div(divText)
+		@usePre = false
+		@title = parseAttribute(divText, "tiddler")
+		if(!@title)
+			@usePre = true;
+			@title = parseAttribute(divText, "title")
+		end
+		@modifier = parseAttribute(divText, "modifier")
+		@created = parseAttribute(divText, "created")
+		@modified = parseAttribute(divText, "modified")
+		@tags = parseAttribute(divText, "tags")
+		parseExtendedAttributes(divText)
+		if(@usePre)
+			@contents = divText.sub(/<div.*?>[\n\r]*<pre>/, "").sub(/<\/pre>[\n\r]*/, "").sub(/<\/div>[\n\r]*/, "")
+		else
+			@contents = divText.sub(/<div.*?>/, "").sub(/<\/div>[\n\r]*/, "").gsub("\\n", "\n").gsub("\\s", "\\")
+		end
+		@contents = CGI::unescapeHTML(@contents.gsub("\r", ""))
+	end
+
 	def parseAttribute(divText, attribute)
 		exp = Regexp.new(Regexp.escape(attribute) + '="([^"]+)"')
 		if(exp.match(divText))
@@ -168,15 +210,37 @@ protected
 		end
 	end
 
+	def parseAddAttribute(divText, attribute)
+		exp = Regexp.new(Regexp.escape(attribute) + '\+="([^"]+)"')
+		if(exp.match(divText))
+			returnval = $1
+		end
+	end
+
 	def parseExtendedAttributes(divText)
 		return if(!divText)
-		standardAttributes = [ "tiddler", "title", "modifier", "modified", "created", "tags" ]
 		match = /<div (.*)>/.match(divText)
 		return if(!match)
 		attributes = match[1].to_s.split(/([^\s\t]*)="([^"]*)"/)
 		0.step(attributes.size - 1, 3) do |i|
 			key, value = attributes[i + 1], attributes[i + 2]
-			@extendedAttributes.store(key, value) if(key && !standardAttributes.include?(key))
+			@extendedAttributes.store(key, value) if(key && !@standardAttributeNames.include?(key))
 		end
+	end
+
+	def modified(infile)
+		@modified ||= infile.ctime.strftime("%Y%m%d%M%S")
+	end
+
+	def created(infile)
+		@created ||= infile.mtime.strftime("%Y%m%d%M%S")
+	end
+
+	def title
+		@title ||= @filename
+	end
+
+	def modifier
+		@modifier ||= ""
 	end
 end

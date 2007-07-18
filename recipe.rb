@@ -1,5 +1,8 @@
 # recipe.rb
 
+# Copyright (c) UnaMesa Association 2004-2007
+# License: Creative Commons Attribution ShareAlike 3.0 License http://creativecommons.org/licenses/by-sa/3.0/
+
 require 'ingredient'
 require "ftools"
 
@@ -67,10 +70,16 @@ protected
 			elsif(line =~ /recipe\:/)
 				loadSubrecipe(File.join(dirname, line.sub(/recipe\:/, "").strip),false)
 			elsif(line =~ /\:/)
-				entry = line.split(':')
-				key = entry.shift.strip
-				file = File.join(dirname, entry.shift.strip)
-				addAddOns(key, file, entry)
+				c = line.index(':')
+				key = line[0, c].strip
+				value = line[(c + 1)...line.length].strip
+				c = value.index(' ')
+				if(c != nil)
+					attributes = value[(c + 1)...value.length].strip
+					value = value[0, c].strip
+				end
+				file = File.join(dirname, value)
+				addAddOns(key, file, attributes)
 				loadSubrecipe(file + ".deps",false) if File.exists?(file + ".deps")
 			else
 				file = File.join(dirname, line.chomp)

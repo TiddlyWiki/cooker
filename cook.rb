@@ -1,11 +1,14 @@
 #!/usr/bin/env ruby
 # cook.rb
 
+# Copyright (c) UnaMesa Association 2004-2007
+# License: Creative Commons Attribution ShareAlike 3.0 License http://creativecommons.org/licenses/by-sa/3.0/
+
 require 'recipe'
 require 'optparse'
 require 'ostruct'
 
-$VERSION = "1.0.1"
+$VERSION = "1.1.0"
 $BUILD = "$Revision$"
 
 class Optparse
@@ -65,7 +68,7 @@ ARGV.each do |file|
 	end
 end
 
-Ingredient.format = options.format
+Tiddler.format = options.format
 
 ARGV.each do |file|
 	recipe = Recipe.new(file, options.dest)

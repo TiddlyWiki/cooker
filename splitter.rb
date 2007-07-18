@@ -1,5 +1,8 @@
 # spliter.rb
 
+# Copyright (c) UnaMesa Association 2004-2007
+# License: Creative Commons Attribution ShareAlike 3.0 License http://creativecommons.org/licenses/by-sa/3.0/
+
 require 'tiddler'
 require 'iconv'
 
@@ -12,11 +15,11 @@ class Splitter
 		dirname = outdir.nil? || outdir.empty? ? @filename : File.join(outdir, File.basename(@filename))
 		while !dirset do
 			@dirname = dirname + "." + dirnum.to_s
-			if(!File.exists?(@dirname))
+			if(File.exists?(@dirname))
+				dirnum += 1
+			else
 				Dir.mkdir(@dirname)
 				dirset = true
-			else
-				dirnum += 1
 			end
 		end
 	end

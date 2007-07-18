@@ -1,11 +1,14 @@
 #!/usr/bin/env ruby
 # ginsu.rb
 
+# Copyright (c) UnaMesa Association 2004-2007
+# License: Creative Commons Attribution ShareAlike 3.0 License http://creativecommons.org/licenses/by-sa/3.0/
+
 require 'splitter'
 require 'optparse'
 require 'ostruct'
 
-$VERSION = "0.9.4"
+$VERSION = "1.1.0"
 $BUILD = "$Revision$"
 
 class Optparse
