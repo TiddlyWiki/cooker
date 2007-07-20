@@ -35,6 +35,14 @@ class Recipe
 		@addons.fetch("copy", Array.new).each { |ingredient| copyFile(ingredient) }
 	end
 
+	def Recipe.quiet
+		@@quiet
+	end
+
+	def Recipe.quiet=(quiet)
+		@@quiet = quiet
+	end
+
 protected
 	def outdir
 		@outdir.empty? ? "" : File.join(@outdir, "")
@@ -109,14 +117,16 @@ protected
 	end
 
 	def writeToDish(outfile, ingredient)
-		if(ingredient.type != "tline")
+		if(ingredient.type != "tline" && !@@quiet)
 			puts "Writing: " + ingredient.filename
 		end
 		outfile << ingredient
 	end
 
 	def copyFile(ingredient)
-		puts "Copying: " + ingredient.filename
+		if(!@@quiet)
+			puts "Copying: " + ingredient.filename
+		end
 		File.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename)))
 	end
 end

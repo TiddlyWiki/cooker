@@ -18,6 +18,8 @@ class Optparse
 		options = OpenStruct.new
 		options.help = ""
 		options.dest = ""
+		options.format = ""
+		options.quiet = false
 
 		opts = OptionParser.new do |opts|
 			opts.banner = "Cook #{version}\n"
@@ -33,9 +35,12 @@ class Optparse
 				options.dest = dest
 			end
 
-			options.format = ""
 			opts.on("-f", "--format FORMAT", "Tiddler format") do |format|
 				options.format = format
+			end
+
+			opts.on("-q", "--[no-]quiet", "Quiet mode, do not output file names") do |quiet|
+				options.quiet = quiet
 			end
 
 			options.help = opts
@@ -69,6 +74,7 @@ ARGV.each do |file|
 end
 
 Tiddler.format = options.format
+Recipe.quiet = options.quiet
 
 ARGV.each do |file|
 	recipe = Recipe.new(file, options.dest)
