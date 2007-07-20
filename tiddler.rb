@@ -5,6 +5,14 @@
 
 require 'cgi'
 
+# Tiddler line in recipe file:
+#	tiddler:TiddlerName.[js|tiddler]
+#	can append tags="tag1 tag2..." to set tiddler tags
+#	or append tags+="tag1 tag2..." to add tags to tiddler
+#	note, no space around '=' or '+='
+# eg:
+#	tiddler:LegacyStrikeThroughPlugin.js tags+="excludeLists"
+
 class Tiddler
 	def initialize
 		@usePre = true
@@ -211,6 +219,8 @@ protected
 	end
 
 	def parseAddAttribute(divText, attribute)
+		return if(!divText || !attribute)
+
 		exp = Regexp.new(Regexp.escape(attribute) + '\+="([^"]+)"')
 		if(exp.match(divText))
 			returnval = $1
