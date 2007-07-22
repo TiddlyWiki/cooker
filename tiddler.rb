@@ -15,6 +15,7 @@ require 'cgi'
 
 class Tiddler
 	def initialize
+		@@format = ""
 		@usePre = true
 		@extendedAttributes = Hash.new
 		@sliceAttributes = Hash.new
@@ -30,10 +31,11 @@ class Tiddler
 		@@format = format
 	end
 
-	attr_reader :title
+	def title
+		@title ||= @filename
+	end
+
 	attr_reader :modifier
-	attr_reader :created
-	attr_reader :modified
 	attr_reader :tags
 	attr_reader :contents
 
@@ -244,10 +246,6 @@ protected
 
 	def created(infile)
 		@created ||= infile.mtime.strftime("%Y%m%d%M%S")
-	end
-
-	def title
-		@title ||= @filename
 	end
 
 	def modifier
