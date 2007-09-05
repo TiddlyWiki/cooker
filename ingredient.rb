@@ -22,6 +22,14 @@ class Ingredient
 		@type
 	end
 
+	def Ingredient.stripcomments
+		@@stripcomments
+	end
+
+	def Ingredient.stripcomments=(stripcomments)
+		@@stripcomments = stripcomments
+	end
+
 	def to_s
 		#"to_s_#{@type}".to_sym
 		subtype = type.split('.')
@@ -70,7 +78,11 @@ protected
 		File.open(@filename) do |infile|
 			out = ""
 			infile.each_line do |line|
-				out << line unless(line.strip =~ /^\/\/#/)
+				if(@@stripcomments)
+					out << line unless(line.strip =~ /^\/\//)
+				else
+					out << line unless(line.strip =~ /^\/\/#/)
+				end
 			end
 			return out
 		end

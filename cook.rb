@@ -20,6 +20,7 @@ class Optparse
 		options.dest = ""
 		options.format = ""
 		options.quiet = false
+		options.stripcomments = false
 
 		opts = OptionParser.new do |opts|
 			opts.banner = "Cook #{version}\n"
@@ -41,6 +42,10 @@ class Optparse
 
 			opts.on("-q", "--[no-]quiet", "Quiet mode, do not output file names") do |quiet|
 				options.quiet = quiet
+			end
+
+			opts.on("-s", "--[no-]stripcommets", "Strip comments") do |stripcomments|
+				options.stripcomments = stripcomments
 			end
 
 			options.help = opts
@@ -75,6 +80,7 @@ end
 
 Tiddler.format = options.format
 Recipe.quiet = options.quiet
+Ingredient.stripcomments = options.stripcomments
 
 ARGV.each do |file|
 	recipe = Recipe.new(file, options.dest)
