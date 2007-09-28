@@ -155,6 +155,12 @@ class Tiddler
 		out << "</div>\n"
 	end
 
+	def to_raw(subtype="tiddler")
+		out = ""
+		@contents.each { |line| out << line.sub("\r", "") }
+		return out
+	end
+
 	def to_plugin
 		header = "/***\n"
 		@sliceAttributeNames.each do |key|

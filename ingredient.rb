@@ -48,7 +48,11 @@ class Ingredient
 		elsif(subtype[0] == "plugin")
 			return to_s_plugin
 		else
-			return to_s_line
+			if(@filename =~ /\.tiddler/)
+				return to_s_raw(subtype[0])
+			else
+				return to_s_line
+			end
 		end
 	end
 
@@ -72,6 +76,13 @@ protected
 		tiddler.loadDiv(@filename)
 		tiddler.setAttributes(@attributes)
 		return tiddler.to_div(subtype)
+	end
+
+	def to_s_raw(subtype)
+		tiddler = Tiddler.new
+		tiddler.loadDiv(@filename)
+		tiddler.setAttributes(@attributes)
+		return tiddler.to_raw(subtype)
 	end
 
 	def to_s_line
