@@ -162,17 +162,19 @@ class Tiddler
 	end
 
 	def to_plugin
-		header = "/***\n"
+		header = ""
 		@sliceAttributeNames.each do |key|
 			out = key
 			value = @sliceAttributes[key]
 			if(out == "CoreVersion" || out == "CodeRepository")
 				out = "~" + out
 			end
+			header = "/***\n" if(header=="" && value)
 			header << "|''#{out}:''|#{value}|\n" if(value)
 		end
 
-		header << "***/\n//{{{\n"
+		header << "***/\n" if(header!="")
+		header << "//{{{\n"
 		sliceName = @sliceAttributes["Name"]
 		if(sliceName)
 			header << "if(!version.extensions.#{sliceName}) {\n" 
