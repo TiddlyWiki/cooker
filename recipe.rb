@@ -65,7 +65,7 @@ protected
 			if(line =~ /<!--@@.*@@-->/)
 				@ingredients << Ingredient.new(line.strip.slice(6..-6), "list")
 			else
-				@ingredients << Ingredient.new(line, "tline")
+				@ingredients << Ingredient.new(line.sub("\r", ""), "tline")
 			end
 		else
 			if(line.strip == "")
