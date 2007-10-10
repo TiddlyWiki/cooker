@@ -111,7 +111,7 @@ protected
 					out << line unless(line.strip =~ /^\/\/#/)
 				end
 			end
-			if(@@compress && subtype == "js")
+			if(@@compress && subtype == "js" && @filename !~ /\/Lingo/&& @filename !~ /\/locale/)
 				out = rhino(out)
 			end
 			return out
