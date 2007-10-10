@@ -21,6 +21,7 @@ class Optparse
 		options.format = ""
 		options.quiet = false
 		options.stripcomments = false
+		options.compress = false
 
 		opts = OptionParser.new do |opts|
 			opts.banner = "Cook #{version}\n"
@@ -46,6 +47,10 @@ class Optparse
 
 			opts.on("-s", "--[no-]stripcommets", "Strip comments") do |stripcomments|
 				options.stripcomments = stripcomments
+			end
+
+			opts.on("-c", "--[no-]compress", "Compress javascript") do |compress|
+				options.compress = compress
 			end
 
 			options.help = opts
@@ -81,6 +86,7 @@ end
 Tiddler.format = options.format
 Recipe.quiet = options.quiet
 Ingredient.stripcomments = options.stripcomments
+Ingredient.compress = options.compress
 
 ARGV.each do |file|
 	recipe = Recipe.new(file, options.dest)

@@ -4,7 +4,15 @@
 # License: Creative Commons Attribution ShareAlike 3.0 License http://creativecommons.org/licenses/by-sa/3.0/
 
 require 'cgi'
+require 'tempfile'
+
 require 'tiddler'
+
+class String
+	def to_file(file_name) #:nodoc:
+		File.open(file_name,"w") { |f| f << self }
+	end
+end
 
 class Ingredient
 
@@ -30,6 +38,14 @@ class Ingredient
 		@@stripcomments = stripcomments
 	end
 
+	def Ingredient.compress
+		@@compress
+	end
+
+	def Ingredient.compress=(compress)
+		@@compress = compress
+	end
+
 	def to_s
 		#"to_s_#{@type}".to_sym
 		subtype = type.split('.')
@@ -51,7 +67,7 @@ class Ingredient
 			if(@filename =~ /\.tiddler/)
 				return to_s_raw(subtype[0])
 			else
-				return to_s_line
+				return to_s_line(subtype[0])
 			end
 		end
 	end
@@ -85,7 +101,7 @@ protected
 		return tiddler.to_raw(subtype)
 	end
 
-	def to_s_line
+	def to_s_line(subtype)
 		File.open(@filename) do |infile|
 			out = ""
 			infile.each_line do |line|
@@ -95,8 +111,27 @@ protected
 					out << line unless(line.strip =~ /^\/\/#/)
 				end
 			end
+			if(@@compress && subtype == "js")
+				out = rhino(out)
+			end
 			return out
 		end
+	end
+
+	def rhino(input)
+		inputfile = "tmp.rhino_in-#{Process.pid}"
+		input.to_file(inputfile)
+		outputfile = "tmp.rhino_out-#{Process.pid}"
+		done = system("java -jar custom_rhino.jar -c #{inputfile} > #{outputfile} 2>&1")
+		if(done)
+			compressed = File.read(outputfile)
+		else
+			# return uncompressed input
+			compressed = input
+		end
+		File.delete(inputfile)
+		File.delete(outputfile)
+		return compressed
 	end
 
 end
