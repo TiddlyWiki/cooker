@@ -19,6 +19,7 @@ class Optparse
 		options.help = ""
 		options.dest = ""
 		options.charset = ""
+		options.usesubdirectories = false
 
 		opts = OptionParser.new do |opts|
 			opts.banner = "Ginsu #{version}\n"
@@ -34,6 +35,14 @@ class Optparse
 				options.dest = dest
 			end
 
+			opts.on("-q", "--[no-]quiet", "Quiet mode, do not output file names") do |quiet|
+				options.quiet = quiet
+			end
+
+			opts.on("-s", "--[no-]subdirectories", "Split tidders into subdirectories by type") do |usesubdirectories|
+				options.usesubdirectories = usesubdirectories
+			end
+			
 			opts.on_tail("-c", "--charset CHARSET", "Character set of filesystem.") do |charset|
 				options.charset = charset
 			end
@@ -68,6 +77,9 @@ ARGV.each do |file|
 		exit
 	end
 end
+
+Splitter.usesubdirectories = options.usesubdirectories
+Splitter.quiet = options.quiet
 
 ARGV.each do |file|
 	splitter = Splitter.new(file, options.dest, options.charset)
