@@ -40,6 +40,11 @@ class Tiddler
 	attr_reader :contents
 
 	def setAttributes(attributes)
+		title = parseAttribute(attributes,"title")
+		if(title)
+			title = title.strip
+			@title = title
+		end
 		tags = parseAddAttribute(attributes,"tags")
 		if(tags)
 			@tags = @tags + " " + tags
@@ -50,39 +55,45 @@ class Tiddler
 			@tags = tags
 			@tags = @tags.strip
 		end
+		desc = parseAttribute(attributes,"Description")
+		if(desc)
+			desc = desc.strip
+			@sliceAttributes["Description"] = desc
+		end
 	end
-
 	def load(filename)
 		# read in a tiddler from a .js and a .js.meta pair of files
-		File.open(filename + ".meta") do |infile|
-			infile.each_line do |line|
-				c = line.index(':')
-				if(c != nil)
-					key = line[0, c].strip
-					value = line[(c + 1)...line.length].strip
-					key2 = key
-					k = key.index('.')
-					if(k != nil)
-						key2 = key[(k + 1)...key.length]
-					end
-					if(@sliceAttributeNames.include?(key2))
-						@sliceAttributes[key2] = value
-					else
-						case key
-						when "title"
-							@title = value
-						when "tiddler"
-							@title = value
-						when "modifier"
-							@modifier = value
-						when "created"
-							@created = value
-						when "modified"
-							@modified = value
-						when "tags"
-							@tags = value
+		if(!@title) #if @title set then metadata has been optained from the recipe file, so don't use the .meta file
+			File.open(filename + ".meta") do |infile|
+				infile.each_line do |line|
+					c = line.index(':')
+					if(c != nil)
+						key = line[0, c].strip
+						value = line[(c + 1)...line.length].strip
+						key2 = key
+						k = key.index('.')
+						if(k != nil)
+							key2 = key[(k + 1)...key.length]
+						end
+						if(@sliceAttributeNames.include?(key2))
+							@sliceAttributes[key2] = value
 						else
-							@extendedAttributes[key] = value
+							case key
+							when "title"
+								@title = value
+							when "tiddler"
+								@title = value
+							when "modifier"
+								@modifier = value
+							when "created"
+								@created = value
+							when "modified"
+								@modified = value
+							when "tags"
+								@tags = value
+							else
+								@extendedAttributes[key] = value
+							end
 						end
 					end
 				end
@@ -163,6 +174,15 @@ class Tiddler
 
 	def to_plugin
 		header = ""
+		sliceName = @sliceAttributes["Name"]
+		if(!sliceName)
+			# if no name specified then use @title
+			sliceName = @title
+			if(sliceName)
+				header = "/***\n"
+				header << "|''Name:''|#{sliceName}|\n"
+			end
+		end
 		@sliceAttributeNames.each do |key|
 			out = key
 			value = @sliceAttributes[key]
@@ -175,7 +195,6 @@ class Tiddler
 
 		header << "***/\n" if(header!="")
 		header << "//{{{\n"
-		sliceName = @sliceAttributes["Name"]
 		if(sliceName)
 			header << "if(!version.extensions.#{sliceName}) {\n" 
 			header << "version.extensions.#{sliceName} = {installed:true};\n\n"

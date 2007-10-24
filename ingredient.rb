@@ -82,8 +82,8 @@ protected
 
 	def to_s_plugin
 		tiddler = Tiddler.new
-		tiddler.load(@filename)
 		tiddler.setAttributes(@attributes)
+		tiddler.load(@filename)
 		return tiddler.to_plugin
 	end
 
