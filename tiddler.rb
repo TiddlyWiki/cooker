@@ -63,7 +63,7 @@ class Tiddler
 	end
 	def load(filename)
 		# read in a tiddler from a .js and a .js.meta pair of files
-		if(!@title) #if @title set then metadata has been optained from the recipe file, so don't use the .meta file
+		begin #use begin rescue block since there may not be a .meta file if the attributes are obtained from the .recipe file
 			File.open(filename + ".meta") do |infile|
 				infile.each_line do |line|
 					c = line.index(':')
@@ -98,6 +98,7 @@ class Tiddler
 					end
 				end
 			end
+		rescue
 		end
 		File.open(filename) do |infile|
 			@contents = ""
