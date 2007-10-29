@@ -13,6 +13,7 @@ class Splitter
 		@shadowNames = ["AdvancedOptions","ColorPalette","EditTemplate","GettingStarted","ImportTiddlers",
 			"MarkupPreBody","MarkupPreHead","MarkupPostBody","MarkupPostHead",
 			"OptionsPanel","PageTemplate","PluginManager",
+			"SiteSubtitle","SiteTitle",
 			"StyleSheet","StyleSheetColors","StyleSheetLayout","StyleSheetLocale","StyleSheetPrint",
 			"TabAll","TabMoreMissing","TabMoreOrphans","TabMoreShadowed","TabTimeline","TabTags",
 			"ViewTemplate"]
@@ -110,7 +111,7 @@ class Splitter
 private
 	def writeTiddler(tiddler, recipe, pluginsrecipe, shadowsrecipe, contentrecipe, feedsrecipe)
 		dirname = @dirname
-		tiddlerFilename = tiddler.title.to_s.gsub(/[\/:\?#\*<> ]/, "_")
+		tiddlerFilename = tiddler.title.to_s.gsub(/[<>]/,"_").gsub(/\t/,"%09").gsub(/#/,"%23").gsub(/%/,"%25").gsub(/\*/,"%2a").gsub(/,/,"%2c").gsub(/\//,"%2f").gsub(/:/,"%3a").gsub(/\?/,"%3f")
 		tiddlerFilename = @conv.iconv(tiddlerFilename)
 		if(tiddler.tags =~ /systemConfig/)
 			dirname = @dirname
