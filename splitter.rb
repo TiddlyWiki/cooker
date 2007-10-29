@@ -10,10 +10,11 @@ class Splitter
 	def initialize(filename, outdir=nil, charset="ISO-8859-1")
 		@filename = filename
 		@conv = Iconv.new(charset,"UTF-8")
-		@shadowNames = ["AdvancedOptions","ColorPalette","EditTemplate","GettingStarted","ImportTiddlers",
+		@shadowNames = ["AdvancedOptions","ColorPalette",
+			"DefaultTiddlers","EditTemplate","GettingStarted","ImportTiddlers","MainMenu",
 			"MarkupPreBody","MarkupPreHead","MarkupPostBody","MarkupPostHead",
 			"OptionsPanel","PageTemplate","PluginManager",
-			"SiteSubtitle","SiteTitle",
+			"SiteSubtitle","SiteTitle","SiteUrl",
 			"StyleSheet","StyleSheetColors","StyleSheetLayout","StyleSheetLocale","StyleSheetPrint",
 			"TabAll","TabMoreMissing","TabMoreOrphans","TabMoreShadowed","TabTimeline","TabTags",
 			"ViewTemplate"]
