@@ -139,7 +139,7 @@ private
 				writeTiddlerToSubDir(tiddler, tiddlerFilename, contentrecipe, "content")
 			end
 		end
-		recipe << "tiddler: #{tiddlerFilename}\n"
+		recipe << "tiddler: #{tiddlerFilename}.tiddler\n"
 		if(!@@quiet)
 			puts "Writing: #{tiddler.title}"
 		end
