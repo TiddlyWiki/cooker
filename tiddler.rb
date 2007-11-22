@@ -61,6 +61,7 @@ class Tiddler
 			@sliceAttributes["Description"] = desc
 		end
 	end
+
 	def load(filename)
 		# read in a tiddler from a .js and a .js.meta pair of files
 		begin #use begin rescue block since there may not be a .meta file if the attributes are obtained from the .recipe file
@@ -113,20 +114,28 @@ class Tiddler
 
 	def loadDiv(filename)
 		# read in tiddler from a .tiddler file
-		File.open(filename) do |infile|
-			line = infile.gets
-			read_div(infile, line)
+		File.open(filename) do |file|
+			line = file.gets
+			divText = ""
+			if(line =~ /<div tiddler=.*<\/div>/)
+				divText = line
+				line = file.gets
+			elsif(line =~ /<div title=.*/)
+				begin
+					divText << line
+					line = file.gets
+				end while line
+			end
+			from_div(divText)
 		end
 	end
 
 	def read_div(file, line)
 		divText = ""
 		if(line =~ /<div tiddler=.*<\/div>/)
-			@usePre = false
 			divText = line
 			line = file.gets
 		elsif(line =~ /<div title=.*/)
-			@usePre = true
 			begin
 				divText << line
 				line = file.gets
@@ -136,7 +145,7 @@ class Tiddler
 		return line
 	end
 
-	def to_div(subtype="tiddler")
+	def to_div(subtype="tiddler",escapeHTML=true)
 		optimizeAttributeStorage = true if(subtype == "shadow")
 		@usePre = true if(subtype == "shadow" && @@format =~ /preshadow/)
 		@usePre = true if(subtype == "tiddler" && @@format =~ /pretiddler/)
@@ -156,7 +165,11 @@ class Tiddler
 		out << ">"
 		if(@usePre)
 			out << "\n<pre>"
-			lines = (CGI::escapeHTML(@contents).gsub("\r", "")).split("\n")
+			lines = @contents
+			if(escapeHTML)
+				lines = CGI::escapeHTML(lines)
+			end
+			lines = (lines.gsub("\r", "")).split("\n")
 			last = lines.pop
 			lines.each { |line| out << line << "\n" }
 			out << last if(last)
@@ -222,6 +235,24 @@ class Tiddler
 
 protected
 	def from_div(divText)
+		parseAllAttributes(divText)
+		parseContent(divText)
+	end
+
+	def parseContent(divText)
+		@contents = ""
+		return if(divText=="")
+		if(@usePre)
+			pos = divText.rindex("</pre>");
+			divText = divText[0,pos] if(pos)
+			@contents = divText.sub(/<div.*?>[\n\r]*<pre>/, "")
+		else
+			@contents = divText.sub(/<div.*?>/, "").sub(/<\/div>[\n\r]*/, "").gsub("\\n", "\n").gsub("\\s", "\\")
+		end
+		@contents = CGI::unescapeHTML(@contents.gsub("\r", ""))
+	end
+
+	def parseAllAttributes(divText)
 		@usePre = false
 		@title = parseAttribute(divText, "tiddler")
 		if(!@title)
@@ -233,12 +264,6 @@ protected
 		@modified = parseAttribute(divText, "modified")
 		@tags = parseAttribute(divText, "tags")
 		parseExtendedAttributes(divText)
-		if(@usePre)
-			@contents = divText.sub(/<div.*?>[\n\r]*<pre>/, "").sub(/<\/pre>[\n\r]*/, "").sub(/<\/div>[\n\r]*/, "")
-		else
-			@contents = divText.sub(/<div.*?>/, "").sub(/<\/div>[\n\r]*/, "").gsub("\\n", "\n").gsub("\\s", "\\")
-		end
-		@contents = CGI::unescapeHTML(@contents.gsub("\r", ""))
 	end
 
 	def parseAttribute(divText, attribute)

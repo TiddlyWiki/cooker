@@ -48,6 +48,7 @@ class Splitter
 		pluginsrecipe = ""
 		contentrecipe = ""
 		feedsrecipe = ""
+		themesrecipe = ""
 		File.open(@filename) do |file|
 			start = false
 			line = file.gets
@@ -60,7 +61,7 @@ class Splitter
 					tiddlerCount += 1
 					tiddler = Tiddler.new
 					line = tiddler.read_div(file,line)
-					writeTiddler(tiddler, recipe, pluginsrecipe, shadowsrecipe, contentrecipe, feedsrecipe)
+					writeTiddler(tiddler, recipe, pluginsrecipe, shadowsrecipe, contentrecipe, feedsrecipe, themesrecipe)
 				else
 					line = file.gets
 				end
@@ -97,6 +98,13 @@ class Splitter
 				end
 				toprecipe << "recipe: feeds/split.recipe\n"
 			end
+			if(themesrecipe != "")
+				dirname = File.join(@dirname, "themes")
+				File.open(File.join(dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
+					recipefile << feedsrecipe
+				end
+				toprecipe << "recipe: themes/split.recipe\n"
+			end
 			recipe = toprecipe
 		end
 		File.open(File.join(@dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
@@ -110,7 +118,7 @@ class Splitter
 	end
 
 private
-	def writeTiddler(tiddler, recipe, pluginsrecipe, shadowsrecipe, contentrecipe, feedsrecipe)
+	def writeTiddler(tiddler, recipe, pluginsrecipe, shadowsrecipe, contentrecipe, feedsrecipe, themesrecipe)
 		dirname = @dirname
 		tiddlerFilename = tiddler.title.to_s.gsub(/[ <>]/,"_").gsub(/\t/,"%09").gsub(/#/,"%23").gsub(/%/,"%25").gsub(/\*/,"%2a").gsub(/,/,"%2c").gsub(/\//,"%2f").gsub(/:/,"%3a").gsub(/</,"%3c").gsub(/>/,"%3e").gsub(/\?/,"%3f")
 		tiddlerFilename = @conv.iconv(tiddlerFilename)
@@ -133,6 +141,8 @@ private
 		else
 			if(tiddler.tags =~ /systemServer/)
 				writeTiddlerToSubDir(tiddler, tiddlerFilename, feedsrecipe, "feeds")
+			elsif(tiddler.tags =~ /systemTheme/)
+				writeTiddlerToSubDir(tiddler, tiddlerFilename, themesrecipe, "themes")
 			elsif(@shadowNames.include?(tiddler.title))
 				writeTiddlerToSubDir(tiddler, tiddlerFilename, shadowsrecipe, "shadows")
 			else
@@ -155,7 +165,7 @@ private
 		end
 		targetfile = File.join(dirname, tiddlerFilename += ".tiddler")
 		File.open(targetfile, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
-			out << tiddler.to_div
+			out << tiddler.to_div("tiddler",false)
 		end
 		recipe << "tiddler: #{tiddlerFilename}\n"
 	end
