@@ -43,6 +43,10 @@ class Optparse
 				options.usesubdirectories = usesubdirectories
 			end
 			
+			opts.on("-t", "--tag TAGDIRECTORY", "Split tidders into subdirectories by type") do |tagsubdirectory|
+				options.tagsubdirectory = tagsubdirectory
+			end
+			
 			opts.on_tail("-c", "--charset CHARSET", "Character set of filesystem.") do |charset|
 				options.charset = charset
 			end
@@ -78,8 +82,9 @@ ARGV.each do |file|
 	end
 end
 
-Splitter.usesubdirectories = options.usesubdirectories
 Splitter.quiet = options.quiet
+Splitter.usesubdirectories = options.usesubdirectories
+Splitter.tagsubdirectory = options.tagsubdirectory
 
 ARGV.each do |file|
 	splitter = Splitter.new(file, options.dest, options.charset)
