@@ -68,7 +68,7 @@ protected
 				@ingredients << Ingredient.new(line.sub("\r", ""), "tline")
 			end
 		else
-			if(line.strip == "")
+			if(line.strip == "" || line[0, 1]=='#')
 				return
 			end
 			if(line =~ /@.*@/)
