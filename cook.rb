@@ -52,6 +52,10 @@ class Optparse
 			opts.on("-c", "--[no-]compress", "Compress javascript") do |compress|
 				options.compress = compress
 			end
+			
+			opts.on("-k", "--keepallcomments", "Keep all javascript comments") do |keepallcomments|
+				options.keepallcomments = keepallcomments
+			end
 
 			options.help = opts
 			opts.on_tail("-h", "--help", "Show this message") do
@@ -87,6 +91,7 @@ Tiddler.format = options.format
 Recipe.quiet = options.quiet
 Ingredient.stripcomments = options.stripcomments
 Ingredient.compress = options.compress
+Ingredient.keepallcomments = options.keepallcomments
 
 ARGV.each do |file|
 	recipe = Recipe.new(file, options.dest)

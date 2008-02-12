@@ -45,6 +45,14 @@ class Ingredient
 	def Ingredient.compress=(compress)
 		@@compress = compress
 	end
+	
+	def Ingredient.keepallcomments
+		@@keepallcomments
+	end
+
+	def Ingredient.keepallcomments=(keepallcomments)
+		@@keepallcomments = keepallcomments
+	end
 
 	def to_s
 		#"to_s_#{@type}".to_sym
@@ -105,7 +113,9 @@ protected
 		File.open(@filename) do |infile|
 			out = ""
 			infile.each_line do |line|
-				if(@@stripcomments)
+				if(@@keepallcomments)
+					out << line
+				elsif(@@stripcomments)
 					out << line unless(line.strip =~ /^\/\//)
 				else
 					out << line unless(line.strip =~ /^\/\/#/)
