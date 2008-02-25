@@ -68,11 +68,17 @@ class Ingredient
 				return to_s_tiddler
 			end
 		elsif(subtype[0] == "shadow")
-			return to_s_retiddle(subtype[0])
+			if(@filename =~ /\.tiddler/)
+				return to_s_retiddle(subtype[0])
+			else
+				# have a non-tidler in the shadow area, so output it raw
+				return to_s_line(subtype[0])
+			end
 		elsif(subtype[0] == "plugin")
 			return to_s_plugin
 		else
 			if(@filename =~ /\.tiddler/)
+				# not in tiddler, shadow or plugin, so output raw content of tiddler
 				return to_s_raw(subtype[0])
 			else
 				return to_s_line(subtype[0])
