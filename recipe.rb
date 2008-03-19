@@ -64,6 +64,13 @@ protected
 		if(isTemplate)
 			if(line =~ /<!--@@.*@@-->/)
 				@ingredients << Ingredient.new(line.strip.slice(6..-6), "list")
+			elsif(line =~ /<!--<<.*>>-->/)
+				item = line.strip.slice(6..-6)
+				c = item.index(' ')
+				if(c != nil)
+					item = item[(c + 1)...item.length].strip
+				end
+				@ingredients << Ingredient.new(item, "list")
 			else
 				@ingredients << Ingredient.new(line.sub("\r", ""), "tline")
 			end
