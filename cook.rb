@@ -21,7 +21,7 @@ class Optparse
 		options.format = ""
 		options.quiet = false
 		options.stripcomments = false
-		options.compress = false
+		options.compress = ""
 
 		opts = OptionParser.new do |opts|
 			opts.banner = "Cook #{version}\n"
