@@ -1,9 +1,10 @@
 # tiddler.rb
 
-# Copyright (c) UnaMesa Association 2004-2007
+# Copyright (c) UnaMesa Association 2004-2008
 # License: Creative Commons Attribution ShareAlike 3.0 License http://creativecommons.org/licenses/by-sa/3.0/
 
 require 'cgi'
+require 'open-uri'
 
 # Tiddler line in recipe file:
 #	tiddler:TiddlerName.[js|tiddler]
@@ -65,7 +66,7 @@ class Tiddler
 	def load(filename)
 		# read in a tiddler from a .js and a .js.meta pair of files
 		begin #use begin rescue block since there may not be a .meta file if the attributes are obtained from the .recipe file
-			File.open(filename + ".meta") do |infile|
+			open(filename + ".meta") do |infile|
 				infile.each_line do |line|
 					c = line.index(':')
 					if(c != nil)
@@ -101,20 +102,22 @@ class Tiddler
 			end
 		rescue
 		end
-		File.open(filename) do |infile|
+		open(filename) do |infile|
 			@contents = ""
 			infile.each_line do |line|
 				@contents << line unless(line.strip =~ /^\/\/#/)
 			end
-			@created ||= infile.mtime.strftime("%Y%m%d%M%S")
+			unless filename =~ /^https?/
+				@created ||= infile.mtime.strftime("%Y%m%d%M%S")
+			end
 			#@modified ||= infile.ctime.strftime("%Y%m%d%M%S")
 		end
-		@title ||= filename
+		@title ||= File.basename(filename,".js")
 	end
 
 	def loadDiv(filename)
 		# read in tiddler from a .tiddler file
-		File.open(filename) do |file|
+		open(filename) do |file|
 			line = file.gets
 			divText = ""
 			if(line =~ /<div tiddler=.*<\/div>/)

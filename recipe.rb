@@ -1,10 +1,12 @@
 # recipe.rb
 
-# Copyright (c) UnaMesa Association 2004-2007
+# Copyright (c) UnaMesa Association 2004-2008
 # License: Creative Commons Attribution ShareAlike 3.0 License http://creativecommons.org/licenses/by-sa/3.0/
 
 require 'ingredient'
 require "ftools"
+require 'net/http'
+require 'uri'
 
 class Recipe
 	def initialize(filename, outdir=nil, isTemplate=false)
@@ -12,8 +14,9 @@ class Recipe
 		@outdir = outdir ||= ""
 		@ingredients = Array.new
 		@addons = Hash.new
-		File.open(filename) do |file|
-			file.each_line { |line| genIngredient(File.dirname(filename), line, isTemplate) }
+		@dirname = File.dirname(filename)
+		open(filename) do |file|
+			file.each_line { |line| genIngredient(@dirname, line, isTemplate) }
 		end
 	end
 
@@ -60,7 +63,7 @@ protected
 		@addons
 	end
 
-	def genIngredient(dirname, line, isTemplate)
+	def genIngredient(dirname, line, isTemplate=false)
 		if(isTemplate)
 			if(line =~ /<!--@@.*@@-->/)
 				@ingredients << Ingredient.new(line.strip.slice(6..-6), "list")
@@ -81,9 +84,17 @@ protected
 			if(line =~ /@.*@/)
 				@ingredients << Ingredient.new(line.strip.slice(1..-2), "list")
 			elsif(line =~ /template\:/)
-				loadSubrecipe(File.join(dirname, line.sub(/template\:/, "").strip),true)
+				value = line.sub(/template\:/, "").strip
+				path = value =~ /^https?/ ? "" : dirname
+				loadSubrecipe(File.join(path, value),true)
 			elsif(line =~ /recipe\:/)
-				loadSubrecipe(File.join(dirname, line.sub(/recipe\:/, "").strip),false)
+				value = line.sub(/recipe\:/, "").strip
+				unless value =~ /^https?/
+					loadSubrecipe(File.join(dirname, value),false)
+				else
+					loadSubrecipe(value,false)
+				end
+				
 			elsif(line =~ /\:/)
 				c = line.index(':')
 				key = line[0, c].strip
@@ -93,7 +104,7 @@ protected
 					attributes = value[(c + 1)...value.length].strip
 					value = value[0, c].strip
 				end
-				file = File.join(dirname, value)
+				file = value =~ /^https?/ ? value : File.join(dirname,value)
 				addAddOns(key, file, attributes)
 				loadSubrecipe(file + ".deps",false) if File.exists?(file + ".deps")
 			else
@@ -124,8 +135,10 @@ protected
 	end
 
 	def writeToDish(outfile, ingredient)
-		if(ingredient.type != "tline" && !@@quiet)
-			puts "Writing: " + ingredient.filename
+		if (! ingredient.is_a? String)
+			if(ingredient.type != "tline" && !@@quiet)
+				puts "Writing: " + ingredient.filename
+			end
 		end
 		outfile << ingredient
 	end
@@ -134,6 +147,21 @@ protected
 		if(!@@quiet)
 			puts "Copying: " + ingredient.filename
 		end
-		File.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename)))
+		if ingredient.filename =~ /^https?/
+			downloadFile(ingredient.filename)
+		else
+			File.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename)))
+		end
+	end
+	
+private
+	def downloadFile(url)
+		uri = URI.parse(url)
+		Net::HTTP.start(uri.host) { |http|
+			resp = http.get(uri.path)
+			open(File.join(outdir, File.basename(url)), "wb") { |file|
+				file.write(resp.body)
+			}
+		}
 	end
 end

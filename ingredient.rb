@@ -1,12 +1,13 @@
 # ingredient.rb
 
-# Copyright (c) UnaMesa Association 2004-2007
+# Copyright (c) UnaMesa Association 2004-2008
 # License: Creative Commons Attribution ShareAlike 3.0 License http://creativecommons.org/licenses/by-sa/3.0/
 
 require 'cgi'
 require 'tempfile'
 
 require 'tiddler'
+require 'splitter'
 
 class String
 	def to_file(file_name) #:nodoc:
@@ -64,6 +65,14 @@ class Ingredient
 		elsif(subtype[0] == "tiddler")
 			if(@filename =~ /\.tiddler/)
 				return to_s_retiddle(subtype[0])
+			elsif(@filename =~/\.html/)
+				out = ''
+				#extractTiddlers(@filename,URI.parse(@filename).fragment.split("%20")).each{|x| out << x.to_div }
+				tiddlers = Splitter.extractTiddlers(@filename,URI.parse(@filename).fragment.split("%20"))
+				tiddlers.each do |tiddler|
+					out << tiddler.to_div
+				end
+				return out
 			else
 				return to_s_tiddler
 			end
@@ -116,7 +125,7 @@ protected
 	end
 
 	def to_s_line(subtype)
-		File.open(@filename) do |infile|
+		open(@filename) do |infile|
 			out = ""
 			infile.each_line do |line|
 				if(@@keepallcomments)

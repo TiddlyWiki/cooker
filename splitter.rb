@@ -1,10 +1,12 @@
 # spliter.rb
 
-# Copyright (c) UnaMesa Association 2004-2007
+# Copyright (c) UnaMesa Association 2004-2008
 # License: Creative Commons Attribution ShareAlike 3.0 License http://creativecommons.org/licenses/by-sa/3.0/
 
 require 'tiddler'
 require 'iconv'
+#require 'open-uri'
+#require 'net/http'
 
 class Splitter
 	def initialize(filename, outdir=nil, charset="ISO-8859-1")
@@ -46,91 +48,44 @@ class Splitter
 
 
 	def split
-		tiddlerCount = 0
-		recipe = ""
-		shadowsrecipe = ""
-		pluginsrecipe = ""
-		contentrecipe = ""
-		feedsrecipe = ""
-		themesrecipe = ""
-		tagsrecipe = ""
-		File.open(@filename) do |file|
-			start = false
-			line = file.gets
-			begin
-				line = file.gets
-			end while(line && line !~ /<div id="storeArea">/)
-			line = line.sub(/.*<div id="storeArea">/, "").strip
-			begin
-				if(line =~ /<div ti.*/)
-					tiddlerCount += 1
-					tiddler = Tiddler.new
-					line = tiddler.read_div(file,line)
-					writeTiddler(tiddler, recipe, pluginsrecipe, shadowsrecipe, contentrecipe, feedsrecipe, themesrecipe, tagsrecipe)
-				else
-					line = file.gets
-				end
-			end while(line && line !~ /<!--STORE-AREA-END-->/ && line !~ /<!--POST-BODY-START-->/ && line !~ /<div id="shadowArea">/)
+		recipes = {"main" => "", "shadows" => "", "plugins" => "", "content" => "", "feeds" => "", "themes" => "", "tags" => ""}
+
+		tiddlerCount = readStoreArea(recipes)
+		if(tiddlerCount == 0)
+			puts "'#{@filename}' does not contain any tiddlers"
+			return
 		end
 		
 		if(@@usesubdirectories)
 			toprecipe = ""
-			if(shadowsrecipe != "")
-				dirname = File.join(@dirname, "shadows")
-				File.open(File.join(dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
-					recipefile << shadowsrecipe
+			recipes.each_key do |k|
+				if(k != "tags" && k !="main")
+					if(recipes[k] != "")
+						dirname = File.join(@dirname, k)
+						File.open(File.join(dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
+							recipefile << recipes[k]
+						end
+						toprecipe << "recipe: " + k + "/split.recipe\n"
+					end
 				end
-				toprecipe << "recipe: shadows/split.recipe\n"
 			end
-			if(pluginsrecipe != "")
-				dirname = File.join(@dirname, "plugins")
-				File.open(File.join(dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
-					recipefile << pluginsrecipe
-				end
-				toprecipe << "recipe: plugins/split.recipe\n"
-			end
-			if(contentrecipe != "")
-				dirname = File.join(@dirname, "content")
-				File.open(File.join(dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
-					recipefile << contentrecipe
-				end
-				toprecipe << "recipe: content/split.recipe\n"
-			end
-			if(feedsrecipe != "")
-				dirname = File.join(@dirname, "feeds")
-				File.open(File.join(dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
-					recipefile << feedsrecipe
-				end
-				toprecipe << "recipe: feeds/split.recipe\n"
-			end
-			if(themesrecipe != "")
-				dirname = File.join(@dirname, "themes")
-				File.open(File.join(dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
-					recipefile << feedsrecipe
-				end
-				toprecipe << "recipe: themes/split.recipe\n"
-			end
-			if(tagsrecipe != "")
+			if(recipes["tags"] != "")
 				dirname = File.join(@dirname, @@tagsubdirectory)
 				File.open(File.join(dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
-					recipefile << tagsrecipe
+					recipefile << recipes["tags"]
 				end
 				toprecipe << "recipe: #{@@tagsubdirectory}/split.recipe\n"
 			end
-			recipe = toprecipe
+			recipes["main"] = toprecipe
 		end
 		File.open(File.join(@dirname, "split.recipe"), File::CREAT|File::TRUNC|File::RDWR, 0644) do |recipefile|
-			recipefile << recipe
+			recipefile << recipes["main"]
 		end
-		if(tiddlerCount == 0)
-			puts "'#{@filename}' does not contain any tiddlers"
-		else
-			puts "\n'#{@filename}' processed, #{tiddlerCount.to_s} tiddlers written to '#{@dirname}'"
-		end
+		puts "\n'#{@filename}' processed, #{tiddlerCount.to_s} tiddlers written to '#{@dirname}'"
 	end
 
 private
-	def writeTiddler(tiddler, recipe, pluginsrecipe, shadowsrecipe, contentrecipe, feedsrecipe, themesrecipe, tagsrecipe)
+	def writeTiddler(tiddler, recipes)
 		dirname = @dirname
 		tiddlerFilename = tiddler.title.to_s.gsub(/[ <>]/,"_").gsub(/\t/,"%09").gsub(/#/,"%23").gsub(/%/,"%25").gsub(/\*/,"%2a").gsub(/,/,"%2c").gsub(/\//,"%2f").gsub(/:/,"%3a").gsub(/</,"%3c").gsub(/>/,"%3e").gsub(/\?/,"%3f")
 		tiddlerFilename = @conv.iconv(tiddlerFilename)
@@ -149,21 +104,21 @@ private
 			File.open(targetfile + ".meta", File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
 				out << tiddler.to_meta
 			end
-			pluginsrecipe << "tiddler: #{tiddlerFilename}\n"
+			recipes["plugins"] << "tiddler: #{tiddlerFilename}\n"
 		else
 			if(tiddler.tags =~ /systemServer/)
-				writeTiddlerToSubDir(tiddler, tiddlerFilename, feedsrecipe, "feeds")
+				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["feeds"], "feeds")
 			elsif(tiddler.tags =~ /systemTheme/)
-				writeTiddlerToSubDir(tiddler, tiddlerFilename, themesrecipe, "themes")
+				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["themes"], "themes")
 			elsif(@@tagsubdirectory && tiddler.tags =~ Regexp.new(@@tagsubdirectory))
-				writeTiddlerToSubDir(tiddler, tiddlerFilename, tagsrecipe, @@tagsubdirectory)
+				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["tags"], @@tagsubdirectory)
 			elsif(@shadowNames.include?(tiddler.title))
-				writeTiddlerToSubDir(tiddler, tiddlerFilename, shadowsrecipe, "shadows")
+				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["shadows"], "shadows")
 			else
-				writeTiddlerToSubDir(tiddler, tiddlerFilename, contentrecipe, "content")
+				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["content"], "content")
 			end
 		end
-		recipe << "tiddler: #{tiddlerFilename}.tiddler\n"
+		recipes["main"] << "tiddler: #{tiddlerFilename}.tiddler\n"
 		if(!@@quiet)
 			puts "Writing: #{tiddler.title}"
 		end
@@ -182,5 +137,59 @@ private
 			out << tiddler.to_div("tiddler",false)
 		end
 		recipe << "tiddler: #{tiddlerFilename}\n"
+	end
+
+	def readStoreArea(recipes)
+		open(@filename) do |file|
+			tiddlerCount = 0
+			start = false
+			line = file.gets
+			begin
+				line = file.gets
+			end while(line && line !~ /<div id="storeArea">/)
+			line = line.sub(/.*<div id="storeArea">/, "").strip
+			begin
+				if(line =~ /<div ti.*/)
+					tiddlerCount += 1
+					tiddler = Tiddler.new
+					line = tiddler.read_div(file,line)
+					writeTiddler(tiddler, recipes)
+				else
+					line = file.gets
+				end
+			end while(line && line !~ /<!--STORE-AREA-END-->/ && line !~ /<!--POST-BODY-START-->/ && line !~ /<div id="shadowArea">/)
+			return tiddlerCount
+		end
+	end
+
+public
+	def Splitter.extractTiddlers(filename,titles)
+		out = Array.new
+		found = Array.new
+		open(filename) do |file|
+			start = false
+			line = file.gets
+			begin
+				line = file.gets
+			end while(line && line !~ /<div id="storeArea">/)
+			line = line.sub(/.*<div id="storeArea">/, "").strip
+			begin
+				if(line =~ /<div ti.*/)
+					tiddler = Tiddler.new
+					line = tiddler.read_div(file,line)
+					if titles.include?(tiddler.title)
+						out.push(tiddler)
+						found.push(tiddler.title)
+					end
+				else
+					line = file.gets
+				end
+			end while(line && line !~ /<!--STORE-AREA-END-->/ && line !~ /<!--POST-BODY-START-->/ && line !~ /<div id="shadowArea">/)
+		end
+		if out.length == titles.length
+			return out
+		else
+			STDERR.puts("Tiddlers #{(titles-found).to_s} not found in #{filename}")
+		end
 	end
 end
