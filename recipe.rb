@@ -26,8 +26,24 @@ class Recipe
 			File.open(outfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
 				@ingredients.each do |ingredient|
 					if(ingredient.type == "list")
-						if(@addons.has_key?(ingredient.filename))
-							@addons.fetch(ingredient.filename).each{ |ingredient| writeToDish(out, ingredient) }
+						if(Ingredient.compress=~/[PR]+/ && ingredient.filename == "js")
+							block = ""
+							if(@addons.has_key?(ingredient.filename))
+								@addons.fetch(ingredient.filename).each do |ingredient| 
+									block += writeToDish(block, ingredient)
+								end
+							end
+							if(Ingredient.compress=~/.?R.?/)
+								block = Ingredient.rhino(block)
+							end
+							if(Ingredient.compress=~/.?P.?/)
+								block = Ingredient.packr(block)
+							end
+							out << block
+						else
+							if(@addons.has_key?(ingredient.filename))
+								@addons.fetch(ingredient.filename).each{ |ingredient| writeToDish(out, ingredient) }
+							end
 						end
 					else
 						writeToDish(out, ingredient)
@@ -135,12 +151,16 @@ protected
 	end
 
 	def writeToDish(outfile, ingredient)
-		if (! ingredient.is_a? String)
+		if (!ingredient.is_a? String)
 			if(ingredient.type != "tline" && !@@quiet)
 				puts "Writing: " + ingredient.filename
 			end
 		end
-		outfile << ingredient
+		if (outfile.is_a? String)
+			outfile = ingredient.to_s
+		else
+			outfile << ingredient
+		end
 	end
 
 	def copyFile(ingredient)

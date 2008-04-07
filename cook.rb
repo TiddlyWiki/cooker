@@ -49,7 +49,12 @@ class Optparse
 				options.stripcomments = stripcomments
 			end
 
-			opts.on("-c", "--[no-]compress", "Compress javascript") do |compress|
+			opts.on("-c", "--compress Compress", "Compress javascript") do |compress|
+				# three options available
+				# F - compress each .js file individually using rhino
+				# R - compress .js files as a single block
+				# P - compress .js files as a single block using packr (not yet available)
+				# P and R may be combined, eg -C PR
 				options.compress = compress
 			end
 			
@@ -106,7 +111,7 @@ end
 Tiddler.format = options.format
 Recipe.quiet = options.quiet
 Ingredient.stripcomments = options.stripcomments
-Ingredient.compress = options.compress
+Ingredient.compress = options.compress.strip
 Ingredient.keepallcomments = options.keepallcomments
 
 ARGV.each do |file|

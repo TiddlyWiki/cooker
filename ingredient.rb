@@ -67,7 +67,6 @@ class Ingredient
 				return to_s_retiddle(subtype[0])
 			elsif(@filename =~/\.html/)
 				out = ''
-				#extractTiddlers(@filename,URI.parse(@filename).fragment.split("%20")).each{|x| out << x.to_div }
 				tiddlers = Splitter.extractTiddlers(@filename,URI.parse(@filename).fragment.split("%20"))
 				tiddlers.each do |tiddler|
 					out << tiddler.to_div
@@ -136,14 +135,15 @@ protected
 					out << line unless(line.strip =~ /^\/\/#/)
 				end
 			end
-			if(@@compress && subtype == "js" && @filename !~ /\/Lingo/&& @filename !~ /\/locale/)
-				out = rhino(out)
+			if(@@compress=="F" && subtype == "js" && @filename !~ /\/Lingo/&& @filename !~ /\/locale/)
+				out = Ingredient.rhino(out)
 			end
 			return out
 		end
 	end
 
-	def rhino(input)
+public
+	def Ingredient.rhino(input)
 		inputfile = "tmp.rhino_in-#{Process.pid}"
 		input.to_file(inputfile)
 		outputfile = "tmp.rhino_out-#{Process.pid}"
@@ -159,4 +159,7 @@ protected
 		return compressed
 	end
 
+	def Ingredient.packr(input)
+		return input
+	end
 end
