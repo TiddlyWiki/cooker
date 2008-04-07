@@ -33,11 +33,11 @@ class Recipe
 									block += writeToDish(block, ingredient)
 								end
 							end
-							if(Ingredient.compress=~/.?R.?/)
+							if(Ingredient.compress=~/[PR]+/)
 								block = Ingredient.rhino(block)
-							end
-							if(Ingredient.compress=~/.?P.?/)
-								block = Ingredient.packr(block)
+								if(Ingredient.compress=~/.?P.?/)
+									block = Ingredient.packr(block)
+								end
 							end
 							out << block
 						else

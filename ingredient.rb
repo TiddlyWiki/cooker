@@ -144,22 +144,29 @@ protected
 
 public
 	def Ingredient.rhino(input)
-		inputfile = "tmp.rhino_in-#{Process.pid}"
-		input.to_file(inputfile)
-		outputfile = "tmp.rhino_out-#{Process.pid}"
-		done = system("java -jar custom_rhino.jar -c #{inputfile} > #{outputfile} 2>&1")
+		inputfile = Tempfile.new('rhino')
+		inputfile.print(input)
+		inputfile.close
+		outputfile = Tempfile.new('rhino')
+		outputfile.close
+		done = system("java -jar custom_rhino.jar -c #{inputfile.path} > #{outputfile.path} 2>&1")
 		if(done)
-			compressed = File.read(outputfile)
+			compressed = File.read(outputfile.path)
 		else
-			# return uncompressed input
-			compressed = input
+			STDERR.puts("Could not compress with custom_rhino.jar. Cooking failed")
+			exit
 		end
-		File.delete(inputfile)
-		File.delete(outputfile)
 		return compressed
 	end
 
 	def Ingredient.packr(input)
-		return input
+		begin
+			require 'packr'
+			compressed = Packr.pack(input, :shrink_vars => true, :base62 => true)
+		rescue LoadError
+			STDERR.puts("Missing Ruby gem Packr - install using: gem install packr. Cooking failed")
+			exit
+		end
+		return compressed
 	end
 end

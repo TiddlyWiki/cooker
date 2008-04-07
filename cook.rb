@@ -55,6 +55,7 @@ class Optparse
 				# R - compress .js files as a single block
 				# P - compress .js files as a single block using packr (not yet available)
 				# P and R may be combined, eg -C PR
+				# only P implies PR, Packr compression is not performed without Rhino compression first
 				options.compress = compress
 			end
 			
