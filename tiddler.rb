@@ -184,8 +184,15 @@ class Tiddler
 	end
 
 	def to_raw(subtype="tiddler")
+		return "" if(@contents=="")
+		contents = @contents
+		if(subtype!="tiddler" && subtype!="shadow" && subtype!="plugin")
+			pos = contents.rindex("</pre>");
+			contents = contents[0,pos] if(pos)
+			contents = contents.sub(/[\n\r]*<pre>/, "")
+		end
 		out = ""
-		@contents.each { |line| out << line.sub("\r", "") }
+		contents.each { |line| out << line.sub("\r", "") }
 		return out
 	end
 
