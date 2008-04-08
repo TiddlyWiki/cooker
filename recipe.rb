@@ -83,6 +83,8 @@ protected
 		if(isTemplate)
 			if(line =~ /<!--@@.*@@-->/)
 				@ingredients << Ingredient.new(line.strip.slice(6..-6), "list")
+			elsif(line =~ /&lt;!--@@.*@@--&gt;/)
+				@ingredients << Ingredient.new(line.strip.slice(9..-9), "list")
 			elsif(line =~ /<!--<<.*>>-->/)
 				item = line.strip.slice(6..-6)
 				c = item.index(' ')
