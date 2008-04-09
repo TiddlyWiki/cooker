@@ -14,18 +14,36 @@ class Recipe
 		@outdir = outdir ||= ""
 		@ingredients = Array.new
 		@addons = Hash.new
+		@tiddlers = Hash.new
 		@dirname = File.dirname(filename)
+		@scan = true # two pass cook - first pass is a scan
 		open(filename) do |file|
 			file.each_line { |line| genIngredient(@dirname, line, isTemplate) }
 		end
+		cook(@scan)
 	end
 
-	def cook
-		puts "Creating file: " + outfilename
+	def cook(scan=false)
+		@scan = scan
+		puts "Creating file: " + outfilename if !@scan
 		if(@ingredients.length > 0)
 			File.open(outfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
 				@ingredients.each do |ingredient|
 					if(ingredient.type == "list")
+						if(!@scan && ingredient.filename=="title")
+							# write the title from the shadow tiddlers if available
+							title = ""
+							if(@tiddlers["SiteTitle"])
+								title << @tiddlers["SiteTitle"].contents
+								if(@tiddlers["SiteSubtitle"])
+									title << " - "
+								end
+							end
+							if(@tiddlers["SiteSubtitle"])
+								title << @tiddlers["SiteSubtitle"].contents
+							end
+							out << title + "\n" if title
+						end
 						if(Ingredient.compress=~/[PR]+/ && ingredient.filename == "js")
 							block = ""
 							if(@addons.has_key?(ingredient.filename))
@@ -51,7 +69,7 @@ class Recipe
 				end
 			end
 		end
-		@addons.fetch("copy", Array.new).each { |ingredient| copyFile(ingredient) }
+		@addons.fetch("copy", Array.new).each { |ingredient| copyFile(ingredient) } if !@scan
 	end
 
 	def Recipe.quiet
@@ -154,10 +172,29 @@ protected
 
 	def writeToDish(outfile, ingredient)
 		if (!ingredient.is_a? String)
-			if(ingredient.type != "tline" && !@@quiet)
-				puts "Writing: " + ingredient.filename
+			if(ingredient.type != "tline")
+				if(@scan)
+					if(ingredient.type=="shadow" || ingredient.type=="tiddler")
+						# save copies of all the shadow tiddlers in scan pass
+						name = File.basename(ingredient.filename,".tiddler")
+						if(Tiddler.looksLikeShadow?(ingredient.filename))
+							tiddler = Tiddler.new
+							tiddler.loadDiv(ingredient.filename)
+							if(Tiddler.isShadow?(tiddler.title))
+								@tiddlers[tiddler.title] = tiddler
+							end
+						end
+					end
+					return
+				else
+					if(ingredient.type == "title")
+						return if(@tiddlers["SiteTitle"]||@tiddlers["SiteSubtitle"]) # don't write the title if it is available from the tiddlers
+					end
+					puts "Writing: " + ingredient.filename if !@@quiet
+				end
 			end
 		end
+		return if @scan
 		if (outfile.is_a? String)
 			outfile = ingredient.to_s
 		else
@@ -166,9 +203,7 @@ protected
 	end
 
 	def copyFile(ingredient)
-		if(!@@quiet)
-			puts "Copying: " + ingredient.filename
-		end
+		puts "Copying: " + ingredient.filename if(!@@quiet)
 		if ingredient.filename =~ /^https?/
 			downloadFile(ingredient.filename)
 		else

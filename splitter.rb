@@ -12,14 +12,6 @@ class Splitter
 	def initialize(filename, outdir=nil, charset="ISO-8859-1")
 		@filename = filename
 		@conv = Iconv.new(charset,"UTF-8")
-		@shadowNames = ["AdvancedOptions","ColorPalette",
-			"DefaultTiddlers","EditTemplate","GettingStarted","ImportTiddlers","MainMenu",
-			"MarkupPreBody","MarkupPreHead","MarkupPostBody","MarkupPostHead",
-			"OptionsPanel","PageTemplate","PluginManager",
-			"SiteSubtitle","SiteTitle","SiteUrl",
-			"StyleSheet","StyleSheetColors","StyleSheetLayout","StyleSheetLocale","StyleSheetPrint",
-			"TabAll","TabMoreMissing","TabMoreOrphans","TabMoreShadowed","TabTimeline","TabTags",
-			"ViewTemplate"]
 		dirset = false
 		dirnum = 0;
 		dirname = outdir.nil? || outdir.empty? ? @filename : File.join(outdir, File.basename(@filename))
@@ -112,7 +104,7 @@ private
 				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["themes"], "themes")
 			elsif(@@tagsubdirectory && tiddler.tags =~ Regexp.new(@@tagsubdirectory))
 				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["tags"], @@tagsubdirectory)
-			elsif(@shadowNames.include?(tiddler.title))
+			elsif(Tiddler.isShadow?(tiddler.title))
 				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["shadows"], "shadows")
 			else
 				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["content"], "content")

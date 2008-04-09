@@ -87,10 +87,10 @@ if(ARGV.empty?)
 end
 
 def remoteFileExists?(url)
-  url = URI.parse(url)
-  Net::HTTP.start(url.host, url.port) do |http|
-    return http.head(url.request_uri).code == "200"
-  end
+	url = URI.parse(url)
+	Net::HTTP.start(url.host, url.port) do |http|
+		return http.head(url.request_uri).code == "200"
+	end
 end
 
 def fileExists?(file)

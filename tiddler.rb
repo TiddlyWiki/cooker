@@ -22,6 +22,14 @@ class Tiddler
 		@sliceAttributes = Hash.new
 		@standardAttributeNames = [ "tiddler", "title", "modifier", "modified", "created", "tags" ]
 		@sliceAttributeNames = ["Name","Description","Version","Requires","CoreVersion","Date","Source","Author","License","Browsers","CodeRepository"]
+		@@shadowNames = ["AdvancedOptions","ColorPalette",
+			"DefaultTiddlers","EditTemplate","GettingStarted","ImportTiddlers","MainMenu",
+			"MarkupPreBody","MarkupPreHead","MarkupPostBody","MarkupPostHead",
+			"OptionsPanel","PageTemplate","PluginManager",
+			"SiteSubtitle","SiteTitle","SiteUrl",
+			"StyleSheet","StyleSheetColors","StyleSheetLayout","StyleSheetLocale","StyleSheetPrint",
+			"TabAll","TabMoreMissing","TabMoreOrphans","TabMoreShadowed","TabTimeline","TabTags",
+			"ViewTemplate"]
 	end
 
 	def Tiddler.format
@@ -30,6 +38,17 @@ class Tiddler
 
 	def Tiddler.format=(format)
 		@@format = format
+	end
+
+	def Tiddler.isShadow?(title)
+		return @@shadowNames.include?(title)
+	end
+
+	def Tiddler.looksLikeShadow?(filename)
+		if(filename =~ /SiteTitle.*/ || filename =~ /SiteSubtitle.*/ || filename =~ /DefaultTiddlers.*/ || filename =~ /PageTemplate.*/ || filename =~ /ViewTemplate.*/)
+			return true
+		end
+		return false
 	end
 
 	def title
