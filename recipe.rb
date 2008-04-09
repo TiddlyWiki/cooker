@@ -15,6 +15,7 @@ class Recipe
 		@ingredients = Array.new
 		@addons = Hash.new
 		@tiddlers = Hash.new
+		@defaultTiddlersFilename = ""
 		@dirname = File.dirname(filename)
 		@scan = true # two pass cook - first pass is a scan
 		open(filename) do |file|
@@ -43,6 +44,9 @@ class Recipe
 								title << @tiddlers["SiteSubtitle"].contents
 							end
 							out << title + "\n" if title
+						end
+						if(!@scan && @@splash  && ingredient.filename=="posthead")
+							writeSplashStyles(out)
 						end
 						if(!@scan && @@splash  && ingredient.filename=="prebody")
 							writeSplash(out)
@@ -193,6 +197,9 @@ protected
 							tiddler.loadDiv(ingredient.filename)
 							if(Tiddler.isShadow?(tiddler.title))
 								@tiddlers[tiddler.title] = tiddler
+								if(tiddler.title=="DefaultTiddlers")
+									@defaultTiddlersFilename = ingredient.filename
+								end
 							end
 						end
 					end
@@ -213,6 +220,21 @@ protected
 		end
 	end
 
+	def writeSplashStyles(out)
+		out << "<style type=\"text/css\">\n"
+		out << "#contentWrapper {display:none;}\n"
+		out << "#splashScreen {display:block;}\n"
+		out << ".title {color:#841;}\n"
+		out << ".subtitle {color:#666;}\n"
+		out << ".header {background:#04b;}\n"
+		out << ".headerShadow {color:#000;}\n"
+		out << ".headerShadow a {font-weight:normal; color:#000;}\n"
+		out << ".headerForeground {color:#fff;}\n"
+		out << ".headerForeground a {font-weight:normal; color:#8cf;}\n"
+		out << ".shadow .title {color:#666;}\n"
+		out << "</style>\n"
+	end
+
 	def writeSplash(out)
 		pageTemplate = @tiddlers["PageTemplate"]
 		viewTemplate = @tiddlers["ViewTemplate"]
@@ -223,19 +245,33 @@ protected
 		sitesubtitle = @tiddlers["SiteSubtitle"]
 		sitesubtitle = sitesubtitle.contents if sitesubtitle
 
+		defaultTiddlers = Array.new
+		if(@tiddlers["DefaultTiddlers"])
+			list = @tiddlers["DefaultTiddlers"].contents
+			items = list.split(" ")
+			items.each do |item|
+				x = item.sub("[[","").sub("]]","");
+				defaultTiddlers.push(x)
+			end
+		end
+
 		splash = pageTemplate.contents
+		#puts "pageTemplate:"+splash
 		tiddlers = ""
-		#tiddler = Tiddler.new
-		#tiddler.loadDiv("./tiddlers/GettingStarted.tiddler");
-		#tiddlers += tiddler.to_html(viewTemplate.contents)
+		defaultTiddlers.each do |title|
+			tiddler = Tiddler.new
+			filename = @defaultTiddlersFilename.sub(/DefaultTiddlers/,title)
+			tiddler.loadDiv(filename);
+			tiddlers += tiddler.to_html(viewTemplate.contents)
+		end
 		#puts "tiddlers:"+tiddlers
 
 		splash = splash.gsub(/<!--\{\{\{-->/,"");
 		splash = splash.gsub(/<!--\}\}\}-->/,"");
-		splash = splash.gsub(/<div id='/,"<div id='s_")
-		splash = splash.gsub(/<span class='siteTitle' refresh='content' tiddler='SiteTitle'><\/span>/,"<span class=\"siteTitle' refresh=\"content\" tiddler=\"SiteTitle\">#{sitetitle}</span>")
+		#splash = splash.gsub(/<div id='/,"<div id='s_")
+		splash = splash.gsub(/<span class='siteTitle' refresh='content' tiddler='SiteTitle'><\/span>/,"<span class=\"siteTitle\" refresh=\"content\" tiddler=\"SiteTitle\">#{sitetitle}</span>")
 		splash = splash.gsub(/<span class='siteSubtitle' refresh='content' tiddler='SiteSubtitle'><\/span>/,"<span class=\"siteSubtitle\" refresh=\"content\" tiddler=\"SiteSubtitle\">#{sitesubtitle}</span>")
-		splash = splash.sub(/<div id='s_tiddlerDisplay'><\/div>/,"<div id=\"s_tiddlerDisplay\">#{tiddlers}</div>")
+		splash = splash.sub(/<div id='tiddlerDisplay'><\/div>/,"<div id=\"s_tiddlerDisplay\">#{tiddlers}</div>")
 		#puts "splash:"+splash
 		out << "<div id=\"splashScreen\">\n"
 		out << splash
