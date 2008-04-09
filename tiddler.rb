@@ -262,6 +262,21 @@ class Tiddler
 		return out
 	end
 
+	def to_html(template)
+		out = template
+		contents = @contents # need to wikify this
+		modified = @modified # need for format dates
+		created = @created
+		out = out.sub(/<!--\{\{\{-->/,"");
+		out = out.sub(/<!--\}\}\}-->/,"");
+		out = out.sub(/<div class='title' macro='view title'><\/div>/,"<div class=\"title\" macro=\"view title\">#{@title}</div>")
+		out = out.sub(/<span macro='view modifier link'><\/span>/,"<span macro=\"view modifier link\">#{@modifier}</span>")
+		out = out.sub(/<span macro='view modified date'><\/span>/,"<span macro=\"view modified date\">#{modified}</span>")
+		out = out.sub(/<span macro='view created date'><\/span>/,"<span macro=\"view created date\">#{created}</span>")
+		out = out.sub(/<div class='viewer' macro='view text wikified'><\/div>/,"<div class=\"viewer\" macro=\"view text wikified\">#{contents}</div>")
+		return out
+	end
+
 protected
 	def from_div(divText)
 		parseAllAttributes(divText)

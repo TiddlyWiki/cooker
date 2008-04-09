@@ -22,6 +22,7 @@ class Optparse
 		options.quiet = false
 		options.stripcomments = false
 		options.compress = ""
+		options.splash = false
 
 		opts = OptionParser.new do |opts|
 			opts.banner = "Cook #{version}\n"
@@ -44,6 +45,10 @@ class Optparse
 			opts.on("-q", "--[no-]quiet", "Quiet mode, do not output file names") do |quiet|
 				options.quiet = quiet
 			end
+
+			#opts.on("-g", "--[no-]splash", "Generate splash screen") do |splash|
+			#	options.splash = splash
+			#end
 
 			opts.on("-s", "--[no-]stripcommets", "Strip comments") do |stripcomments|
 				options.stripcomments = stripcomments
@@ -111,6 +116,7 @@ end
 
 Tiddler.format = options.format
 Recipe.quiet = options.quiet
+Recipe.splash = options.splash
 Ingredient.stripcomments = options.stripcomments
 Ingredient.compress = options.compress.strip
 Ingredient.keepallcomments = options.keepallcomments

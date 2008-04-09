@@ -44,6 +44,9 @@ class Recipe
 							end
 							out << title + "\n" if title
 						end
+						if(!@scan && @@splash  && ingredient.filename=="prebody")
+							writeSplash(out)
+						end
 						if(Ingredient.compress=~/[PR]+/ && ingredient.filename == "js")
 							block = ""
 							if(@addons.has_key?(ingredient.filename))
@@ -78,6 +81,14 @@ class Recipe
 
 	def Recipe.quiet=(quiet)
 		@@quiet = quiet
+	end
+
+	def Recipe.splash
+		@@splash
+	end
+
+	def Recipe.splash=(splash)
+		@@splash = splash
 	end
 
 protected
@@ -200,6 +211,35 @@ protected
 		else
 			outfile << ingredient
 		end
+	end
+
+	def writeSplash(out)
+		pageTemplate = @tiddlers["PageTemplate"]
+		viewTemplate = @tiddlers["ViewTemplate"]
+		return if !pageTemplate || !viewTemplate
+
+		sitetitle = @tiddlers["SiteTitle"]
+		sitetitle = sitetitle.contents if sitetitle
+		sitesubtitle = @tiddlers["SiteSubtitle"]
+		sitesubtitle = sitesubtitle.contents if sitesubtitle
+
+		splash = pageTemplate.contents
+		tiddlers = ""
+		#tiddler = Tiddler.new
+		#tiddler.loadDiv("./tiddlers/GettingStarted.tiddler");
+		#tiddlers += tiddler.to_html(viewTemplate.contents)
+		#puts "tiddlers:"+tiddlers
+
+		splash = splash.gsub(/<!--\{\{\{-->/,"");
+		splash = splash.gsub(/<!--\}\}\}-->/,"");
+		splash = splash.gsub(/<div id='/,"<div id='s_")
+		splash = splash.gsub(/<span class='siteTitle' refresh='content' tiddler='SiteTitle'><\/span>/,"<span class=\"siteTitle' refresh=\"content\" tiddler=\"SiteTitle\">#{sitetitle}</span>")
+		splash = splash.gsub(/<span class='siteSubtitle' refresh='content' tiddler='SiteSubtitle'><\/span>/,"<span class=\"siteSubtitle\" refresh=\"content\" tiddler=\"SiteSubtitle\">#{sitesubtitle}</span>")
+		splash = splash.sub(/<div id='s_tiddlerDisplay'><\/div>/,"<div id=\"s_tiddlerDisplay\">#{tiddlers}</div>")
+		#puts "splash:"+splash
+		out << "<div id=\"splashScreen\">\n"
+		out << splash
+		out << "</div>\n"
 	end
 
 	def copyFile(ingredient)
