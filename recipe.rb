@@ -249,9 +249,12 @@ protected
 		if(@tiddlers["DefaultTiddlers"])
 			list = @tiddlers["DefaultTiddlers"].contents
 			items = list.split(" ")
-			items.each do |item|
-				x = item.sub("[[","").sub("]]","");
+			count = items.length
+			i = 0
+			while(i<count)
+				x = items[i].sub("[[","").sub("]]","");
 				defaultTiddlers.push(x)
+				i = i+1
 			end
 		end
 
@@ -269,9 +272,12 @@ protected
 		splash = splash.gsub(/<!--\{\{\{-->/,"");
 		splash = splash.gsub(/<!--\}\}\}-->/,"");
 		#splash = splash.gsub(/<div id='/,"<div id='s_")
-		splash = splash.gsub(/<span class='siteTitle' refresh='content' tiddler='SiteTitle'><\/span>/,"<span class=\"siteTitle\" refresh=\"content\" tiddler=\"SiteTitle\">#{sitetitle}</span>")
-		splash = splash.gsub(/<span class='siteSubtitle' refresh='content' tiddler='SiteSubtitle'><\/span>/,"<span class=\"siteSubtitle\" refresh=\"content\" tiddler=\"SiteSubtitle\">#{sitesubtitle}</span>")
+		splash = splash.gsub(/<span class='siteTitle' refresh='content' tiddler='SiteTitle'><\/span>/,"<span class=\"siteTitle\">#{sitetitle}</span>")
+		splash = splash.gsub(/<span class='siteSubtitle' refresh='content' tiddler='SiteSubtitle'><\/span>/,"<span class=\"siteSubtitle\">#{sitesubtitle}</span>")
 		splash = splash.sub(/<div id='tiddlerDisplay'><\/div>/,"<div id=\"s_tiddlerDisplay\">#{tiddlers}</div>")
+		splash = splash.gsub(/ macro='[\w \.\[\]:]*'/,"")
+		splash = splash.gsub(/<div class='(\w*)'/,"<div class=\"\\1\"")
+		splash = splash.gsub(/<div id='(\w*)'/,"<div id=\"\\1\"")
 		#puts "splash:"+splash
 		out << "<div id=\"splashScreen\">\n"
 		out << splash

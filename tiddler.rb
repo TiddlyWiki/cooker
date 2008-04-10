@@ -5,6 +5,9 @@
 
 require 'cgi'
 require 'open-uri'
+require 'time'
+require 'date'
+require 'date/format'
 
 # Tiddler line in recipe file:
 #	tiddler:TiddlerName.[js|tiddler]
@@ -263,17 +266,23 @@ class Tiddler
 	end
 
 	def to_html(template)
-		out = template
 		contents = @contents # need to wikify this
-		modified = @modified # need for format dates
-		created = @created
+		t = Time.local(@created[0,4],@created[4,2],@created[6,2])
+		created = t.strftime("created %d %B %Y")
+		t = Time.local(@modified[0,4],@modified[4,2],@modified[6,2])
+		modified = t.strftime("%d %B %Y")
+
+		out = template
 		out = out.sub(/<!--\{\{\{-->/,"");
 		out = out.sub(/<!--\}\}\}-->/,"");
-		out = out.sub(/<div class='title' macro='view title'><\/div>/,"<div class=\"title\" macro=\"view title\">#{@title}</div>")
-		out = out.sub(/<span macro='view modifier link'><\/span>/,"<span macro=\"view modifier link\">#{@modifier}</span>")
-		out = out.sub(/<span macro='view modified date'><\/span>/,"<span macro=\"view modified date\">#{modified}</span>")
-		out = out.sub(/<span macro='view created date'><\/span>/,"<span macro=\"view created date\">#{created}</span>")
-		out = out.sub(/<div class='viewer' macro='view text wikified'><\/div>/,"<div class=\"viewer\" macro=\"view text wikified\">#{contents}</div>")
+		out = out.sub(/<div class='title' macro='view title'><\/div>/,"<div class=\"title\">#{@title}</div>")
+		out = out.sub(/<span macro='view modifier link'><\/span>/,"<span>#{@modifier}</span>")
+		out = out.sub(/<span macro='view modified date(?: "[\w\-\:\/ ]*")?'><\/span>/,"<span>#{modified}</span>")
+		out = out.sub(/<span macro='view created date(?: "[\w\-\:\/ ]*")?'><\/span>/,"<span>#{created}</span>")
+		out = out.sub(/<div class='viewer' macro='view text wikified'><\/div>/,"<div class=\"viewer\">#{contents}</div>")
+		out = out.gsub(/ macro='[\w \.\[\]:]*'/,"")
+		out = out.gsub(/<div class='(\w*)'/,"<div class=\"\\1\"")
+		out = out.gsub(/<div id='(\w*)'/,"<div id=\"\\1\"")
 		return out
 	end
 
