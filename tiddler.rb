@@ -266,7 +266,8 @@ class Tiddler
 	end
 
 	def to_html(template)
-		contents = @contents # need to wikify this
+		contents = wikify(@contents)
+		
 		t = Time.local(@created[0,4],@created[4,2],@created[6,2])
 		created = t.strftime("created %d %B %Y")
 		t = Time.local(@modified[0,4],@modified[4,2],@modified[6,2])
@@ -356,5 +357,15 @@ protected
 
 	def modifier
 		@modifier ||= ""
+	end
+private
+	def wikify(text)
+		text = text.gsub(/\n\n/,"<br /><br />")
+		text = text.gsub(/\n\*/,"<br />*")
+		text = text.gsub(/([^\|])http:\/\/([\w\.\/\?=:-]+)/,"\\1<a class=\"externalLink\" href=\"\\1http://\\2\" title=\"External link to http://\\2\" target=\"_blank\">http://\\2</a>")
+		text = text.gsub(/\[\[([\w -]+)\|http:\/\/([\w\.\/\?=:-]+)\]\]/,"<a class=\"externalLink\" href=\"http://\\2\" title=\"External link to http://\\2\" target=\"_blank\">\\1</a>")
+		
+		text = text.gsub(/\[\[([\w -]+)(?:\|[\w -]+)?\]\]/,"<a class=\"tiddlyLink tiddlyLinkExisting\" href=\"javascript:;\" title=\"\\1\">\\1</a>")
+		text = text + "<br /><br />"
 	end
 end
