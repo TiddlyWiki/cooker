@@ -23,6 +23,7 @@ class Optparse
 		options.stripcomments = false
 		options.compress = ""
 		options.splash = false
+		options.section = ""
 
 		opts = OptionParser.new do |opts|
 			opts.banner = "Cook #{version}\n"
@@ -30,6 +31,16 @@ class Optparse
 			opts.separator ""
 			opts.separator "Specific options:"
 
+			opts.on("-c", "--compress COMPRESS", "Compress javascript, use -c, -cr or -crp") do |compress|
+				# three options available
+				# F - compress each .js file individually using rhino
+				# R - compress .js files as a single block
+				# P - compress .js files as a single block using packr (not yet available)
+				# P and R may be combined, eg -c PR
+				# only P implies PR, Packr compression is not performed without Rhino compression first
+				options.compress = compress.downcase
+			end
+			
 			opts.on("-d", "--dest DESTINATION", "Destination directory") do |dest|
 				if(!File.exist?(dest))
 					STDERR.puts("ERROR - Destination directory '#{dest}' does not exist.")
@@ -42,30 +53,25 @@ class Optparse
 				options.format = format
 			end
 
-			opts.on("-q", "--[no-]quiet", "Quiet mode, do not output file names") do |quiet|
-				options.quiet = quiet
-			end
-
 			#opts.on("-g", "--[no-]splash", "Generate splash screen") do |splash|
 			#	options.splash = splash
 			#end
+
+			opts.on("-j", "--javascriptonly", "Generate a file that only contains the javascript") do |javascriptonly|
+				options.section = "js"
+				puts "o.section:"+options.section
+			end
+
+			opts.on("-k", "--keepallcomments", "Keep all javascript comments") do |keepallcomments|
+				options.keepallcomments = keepallcomments
+			end
 
 			opts.on("-s", "--[no-]stripcommets", "Strip comments") do |stripcomments|
 				options.stripcomments = stripcomments
 			end
 
-			opts.on("-c", "--compress Compress", "Compress javascript") do |compress|
-				# three options available
-				# F - compress each .js file individually using rhino
-				# R - compress .js files as a single block
-				# P - compress .js files as a single block using packr (not yet available)
-				# P and R may be combined, eg -C PR
-				# only P implies PR, Packr compression is not performed without Rhino compression first
-				options.compress = compress
-			end
-			
-			opts.on("-k", "--keepallcomments", "Keep all javascript comments") do |keepallcomments|
-				options.keepallcomments = keepallcomments
+			opts.on("-q", "--[no-]quiet", "Quiet mode, do not output file names") do |quiet|
+				options.quiet = quiet
 			end
 
 			options.help = opts
@@ -116,10 +122,11 @@ end
 
 Tiddler.format = options.format
 Recipe.quiet = options.quiet
+Recipe.section = options.section
 Recipe.splash = options.splash
-Ingredient.stripcomments = options.stripcomments
 Ingredient.compress = options.compress.strip
 Ingredient.keepallcomments = options.keepallcomments
+Ingredient.stripcomments = options.stripcomments
 
 ARGV.each do |file|
 	recipe = Recipe.new(file, options.dest)

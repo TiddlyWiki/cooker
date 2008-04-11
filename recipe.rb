@@ -51,16 +51,17 @@ class Recipe
 						if(!@scan && @@splash  && ingredient.filename=="prebody")
 							writeSplash(out)
 						end
-						if(Ingredient.compress=~/[PR]+/ && ingredient.filename == "js")
+						if(Ingredient.compress=~/[pr]+/ && ingredient.filename == "js")
 							block = ""
 							if(@addons.has_key?(ingredient.filename))
 								@addons.fetch(ingredient.filename).each do |ingredient| 
-									block += writeToDish(block, ingredient)
+									b = writeToDish(block, ingredient)
+									block += b if(b)
 								end
 							end
-							if(Ingredient.compress=~/[PR]+/)
+							if(Ingredient.compress=~/[pr]+/)
 								block = Ingredient.rhino(block)
-								if(Ingredient.compress=~/.?P.?/)
+								if(Ingredient.compress=~/.?p.?/)
 									block = Ingredient.packr(block)
 								end
 							end
@@ -93,6 +94,15 @@ class Recipe
 
 	def Recipe.splash=(splash)
 		@@splash = splash
+	end
+
+	def Recipe.section
+		@@section
+	end
+
+	def Recipe.section=(section)
+		@@section = section
+		puts "r.section:"+@@section
 	end
 
 protected
@@ -208,12 +218,13 @@ protected
 					if(ingredient.type == "title")
 						return if(@tiddlers["SiteTitle"]||@tiddlers["SiteSubtitle"]) # don't write the title if it is available from the tiddlers
 					end
-					puts "Writing: " + ingredient.filename if !@@quiet
 				end
 			end
 		end
 		return if @scan
-		if (outfile.is_a? String)
+		return if(@@section && @@section!=ingredient.type)
+		puts "Writing: " + ingredient.filename if !@@quiet
+		if(outfile.is_a? String)
 			outfile = ingredient.to_s
 		else
 			outfile << ingredient
