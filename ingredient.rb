@@ -135,7 +135,7 @@ protected
 					out << line unless(line.strip =~ /^\/\/#/)
 				end
 			end
-			if(@@compress=="F" && subtype == "js" && @filename !~ /\/Lingo/&& @filename !~ /\/locale/)
+			if(@@compress=="f" && subtype == "js" && @filename !~ /\/Lingo/&& @filename !~ /\/locale/)
 				out = Ingredient.rhino(out)
 			end
 			return out

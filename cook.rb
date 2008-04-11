@@ -59,7 +59,6 @@ class Optparse
 
 			opts.on("-j", "--javascriptonly", "Generate a file that only contains the javascript") do |javascriptonly|
 				options.section = "js"
-				puts "o.section:"+options.section
 			end
 
 			opts.on("-k", "--keepallcomments", "Keep all javascript comments") do |keepallcomments|
@@ -76,7 +75,6 @@ class Optparse
 
 			options.help = opts
 			opts.on_tail("-h", "--help", "Show this message") do
-				puts options.help
 				exit 64
 			end
 

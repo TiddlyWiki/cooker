@@ -102,7 +102,6 @@ class Recipe
 
 	def Recipe.section=(section)
 		@@section = section
-		puts "r.section:"+@@section
 	end
 
 protected
@@ -222,11 +221,11 @@ protected
 			end
 		end
 		return if @scan
-		return if(@@section && @@section!=ingredient.type)
-		puts "Writing: " + ingredient.filename if !@@quiet
+		return if(@@section!="" && @@section!=ingredient.type)
 		if(outfile.is_a? String)
 			outfile = ingredient.to_s
 		else
+			puts "Writing: " + ingredient.filename if !@@quiet && ingredient.type!="tline"
 			outfile << ingredient
 		end
 	end
