@@ -17,26 +17,32 @@ class Recipe
 		@tiddlers = Hash.new
 		@defaultTiddlersFilename = ""
 		@dirname = File.dirname(filename)
-		@scan = true # two pass cook - first pass is a scan
 		open(filename) do |file|
 			file.each_line { |line| genIngredient(@dirname, line, isTemplate) }
 		end
 	end
 
 	def scanrecipe
-		cook(true)
+		if(@ingredients.length > 0)
+			@ingredients.each do |ingredient|
+				if(ingredient.type == "list")
+					if(@addons.has_key?(ingredient.filename))
+						@addons.fetch(ingredient.filename).each{ |ingredient| writeToDishScan(ingredient) }
+					end
+				else
+					writeToDishScan(ingredient)
+				end
+			end
+		end
 	end
 
-	def cook(scan=false)
-		@scan = scan
-		puts "Creating file: " + outfilename if !@scan
+	def cook
+		puts "Creating file: " + outfilename
 		if(@ingredients.length > 0)
-			mode = File::CREAT|File::TRUNC|File::RDWR
-			mode = File::RDWR if @scan
-			File.open(outfilename, mode, 0644) do |out|
+			File.open(outfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
 				@ingredients.each do |ingredient|
 					if(ingredient.type == "list")
-						if(!@scan && ingredient.filename=="title")
+						if(ingredient.filename=="title")
 							# write the title from the shadow tiddlers if available
 							title = ""
 							if(@tiddlers["SiteTitle"])
@@ -50,10 +56,10 @@ class Recipe
 							end
 							out << title + "\n" if title
 						end
-						if(!@scan && @@splash  && ingredient.filename=="posthead")
+						if(@@splash  && ingredient.filename=="posthead")
 							writeSplashStyles(out)
 						end
-						if(!@scan && @@splash  && ingredient.filename=="prebody")
+						if(@@splash  && ingredient.filename=="prebody")
 							writeSplash(out)
 						end
 						if(Ingredient.compress=~/[pr]+/ && ingredient.filename == "js")
@@ -82,7 +88,7 @@ class Recipe
 				end
 			end
 		end
-		@addons.fetch("copy", Array.new).each { |ingredient| copyFile(ingredient) } if !@scan
+		@addons.fetch("copy", Array.new).each { |ingredient| copyFile(ingredient) }
 	end
 
 	def Recipe.quiet
@@ -199,33 +205,31 @@ protected
 		@addons.store(key, addonarray)
 	end
 
-	def writeToDish(outfile, ingredient)
+	def writeToDishScan(ingredient)
 		if (!ingredient.is_a? String)
-			if(ingredient.type != "tline")
-				if(@scan)
-					if(ingredient.type=="shadow" || ingredient.type=="tiddler")
-						# save copies of all the shadow tiddlers in scan pass
-						name = File.basename(ingredient.filename,".tiddler")
-						if(Tiddler.looksLikeShadow?(ingredient.filename))
-							tiddler = Tiddler.new
-							tiddler.loadDiv(ingredient.filename)
-							if(Tiddler.isShadow?(tiddler.title))
-								@tiddlers[tiddler.title] = tiddler
-								if(tiddler.title=="DefaultTiddlers")
-									@defaultTiddlersFilename = ingredient.filename
-								end
-							end
+			if(ingredient.type=="shadow" || ingredient.type=="tiddler")
+				# save copies of all the shadow tiddlers in scan pass
+				name = File.basename(ingredient.filename,".tiddler")
+				if(Tiddler.looksLikeShadow?(ingredient.filename))
+					tiddler = Tiddler.new
+					tiddler.loadDiv(ingredient.filename)
+					if(Tiddler.isShadow?(tiddler.title))
+						@tiddlers[tiddler.title] = tiddler
+						if(tiddler.title=="DefaultTiddlers")
+							@defaultTiddlersFilename = ingredient.filename
 						end
-					end
-					return
-				else
-					if(ingredient.type == "title")
-						return if(@tiddlers["SiteTitle"]||@tiddlers["SiteSubtitle"]) # don't write the title if it is available from the tiddlers
 					end
 				end
 			end
 		end
-		return if @scan
+	end
+
+	def writeToDish(outfile, ingredient)
+		if (!ingredient.is_a? String)
+			if(ingredient.type == "title")
+				return if(@tiddlers["SiteTitle"]||@tiddlers["SiteSubtitle"]) # don't write the title if it is available from the tiddlers
+			end
+		end
 		return if(@@section!="" && @@section!=ingredient.type)
 		if(outfile.is_a? String)
 			outfile = ingredient.to_s
