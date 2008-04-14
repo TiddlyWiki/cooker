@@ -128,5 +128,6 @@ Ingredient.stripcomments = options.stripcomments
 
 ARGV.each do |file|
 	recipe = Recipe.new(file, options.dest)
+	recipe.scanrecipe
 	recipe.cook
 end

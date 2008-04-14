@@ -21,14 +21,19 @@ class Recipe
 		open(filename) do |file|
 			file.each_line { |line| genIngredient(@dirname, line, isTemplate) }
 		end
-		cook(@scan)
+	end
+
+	def scanrecipe
+		cook(true)
 	end
 
 	def cook(scan=false)
 		@scan = scan
 		puts "Creating file: " + outfilename if !@scan
 		if(@ingredients.length > 0)
-			File.open(outfilename, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+			mode = File::CREAT|File::TRUNC|File::RDWR
+			mode = File::RDWR if @scan
+			File.open(outfilename, mode, 0644) do |out|
 				@ingredients.each do |ingredient|
 					if(ingredient.type == "list")
 						if(!@scan && ingredient.filename=="title")
