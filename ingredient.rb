@@ -17,10 +17,11 @@ end
 
 class Ingredient
 
-	def initialize(filename, type, attributes=nil)
+	def initialize(filename, type, attributes=nil, raw=false)
 		@attributes = attributes
 		@filename = filename
 		@type = type
+		@raw = raw
 	end
 
 	def filename
@@ -29,6 +30,10 @@ class Ingredient
 
 	def type
 		@type
+	end
+
+	def raw
+		@raw
 	end
 
 	def Ingredient.stripcomments
@@ -60,6 +65,8 @@ class Ingredient
 		subtype = type.split('.')
 
 		if(@type == "tline")
+			return @filename
+		elsif(@raw == true)
 			return @filename
 		elsif(subtype[0] == "list")
 		elsif(subtype[0] == "tiddler")

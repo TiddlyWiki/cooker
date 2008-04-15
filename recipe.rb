@@ -165,7 +165,6 @@ protected
 				else
 					loadSubrecipe(value,false)
 				end
-				
 			elsif(line =~ /\:/)
 				c = line.index(':')
 				key = line[0, c].strip
@@ -178,6 +177,14 @@ protected
 				file = value =~ /^https?/ ? value : File.join(dirname,value)
 				addAddOns(key, file, attributes)
 				loadSubrecipe(file + ".deps",false) if File.exists?(file + ".deps")
+			elsif(line =~ /\=/)
+			#puts "line:"+ line
+				c = line.index('=')
+				key = line[0, c].strip
+				value = line[(c + 1)...line.length]
+			#puts "value:"+ value
+				addAddOns(key, value, nil, true)
+				#@ingredients << Ingredient.new(value, "text")
 			else
 				file = File.join(dirname, line.chomp)
 				@ingredients << Ingredient.new(file, "line")
@@ -192,14 +199,14 @@ protected
 		recipe.addons.each { |key, value| addAddOns(key, value) }
 	end
 
-	def addAddOns(key, value, attributes=nil)
+	def addAddOns(key, value, attributes=nil, raw=false)
 		addonarray = @addons.fetch(key, Array.new)
 		if(value.class == Array)
 			addonarray = addonarray + value
 		elsif(value.class == Ingredient)
 			addonarray.push(value)
 		else
-			ingredient = Ingredient.new(value, key, attributes)
+			ingredient = Ingredient.new(value, key, attributes, raw)
 			addonarray.push(ingredient)
 		end
 		@addons.store(key, addonarray)
@@ -234,7 +241,7 @@ protected
 		if(outfile.is_a? String)
 			outfile = ingredient.to_s
 		else
-			puts "Writing: " + ingredient.filename if !@@quiet && ingredient.type!="tline"
+			puts "Writing: " + ingredient.filename if !@@quiet && ingredient.type!="tline" && ingredient.raw==false
 			outfile << ingredient
 		end
 	end
