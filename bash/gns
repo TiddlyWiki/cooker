@@ -1,0 +1,7 @@
+#!/bin/bash
+TWTRUNKDIR=$HOME/Documents/TiddlyWiki/Trunk
+DEFAULT_FILENAME=index
+FILENAME=${1:-$DEFAULT_FILENAME}
+DEST=$PWD
+RECIPE=$PWD/$FILENAME.html
+ruby -C $TWTRUNKDIR/tools/cooker ginsu.rb $RECIPE -d$DEST $2 $3 $4 $5
