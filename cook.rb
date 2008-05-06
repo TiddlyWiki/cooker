@@ -22,6 +22,7 @@ class Optparse
 		options.quiet = false
 		options.stripcomments = false
 		options.compress = ""
+		options.root = ""
 		options.splash = false
 		options.section = ""
 
@@ -30,6 +31,10 @@ class Optparse
 			opts.banner += "Usage: cook.rb recipename [...] [options]"
 			opts.separator ""
 			opts.separator "Specific options:"
+
+			opts.on("-r", "--root ROOT", "Root path") do |root|
+				options.root = root
+			end
 
 			opts.on("-c", "--compress COMPRESS", "Compress javascript, use -c, -cr or -crp") do |compress|
 				# three options available
@@ -65,12 +70,12 @@ class Optparse
 				options.keepallcomments = keepallcomments
 			end
 
-			opts.on("-s", "--[no-]stripcommets", "Strip comments") do |stripcomments|
-				options.stripcomments = stripcomments
-			end
-
 			opts.on("-q", "--[no-]quiet", "Quiet mode, do not output file names") do |quiet|
 				options.quiet = quiet
+			end
+
+			opts.on("-s", "--[no-]stripcommets", "Strip comments") do |stripcomments|
+				options.stripcomments = stripcomments
 			end
 
 			options.help = opts
@@ -121,6 +126,7 @@ end
 Tiddler.format = options.format
 Recipe.quiet = options.quiet
 Recipe.section = options.section
+Recipe.root = options.root
 Recipe.splash = options.splash
 Ingredient.compress = options.compress.strip
 Ingredient.keepallcomments = options.keepallcomments

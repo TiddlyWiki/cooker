@@ -17,7 +17,13 @@ class Recipe
 		@tiddlers = Hash.new
 		@defaultTiddlersFilename = ""
 		@dirname = File.dirname(filename)
-		open(filename) do |file|
+		if(@dirname =~ /\$TW_ROOT\//)
+			c = @dirname.index('$TW_ROOT')
+			@dirname = @dirname[(c + 8)...@dirname.length].strip
+			@dirname = @@root + @dirname
+		end
+		@filename = File.join(@dirname,File.basename(filename))
+		open(@filename) do |file|
 			file.each_line { |line| genIngredient(@dirname, line, isTemplate) }
 		end
 	end
@@ -97,6 +103,14 @@ class Recipe
 
 	def Recipe.quiet=(quiet)
 		@@quiet = quiet
+	end
+
+	def Recipe.root
+		@@root
+	end
+
+	def Recipe.root=(root)
+		@@root = root
 	end
 
 	def Recipe.splash
