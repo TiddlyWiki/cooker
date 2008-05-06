@@ -1,7 +1,7 @@
 #!/bin/bash
-TWTRUNKDIR=$HOME/Documents/TiddlyWiki/Trunk
+TW_TRUNKDIR=$HOME/Documents/TiddlyWiki/Trunk
 DEFAULT_FILENAME=index
 FILENAME=${1:-$DEFAULT_FILENAME}
 DEST=$PWD
 RECIPE=$PWD/$FILENAME.html.recipe
-ruby -Ku -C $TWTRUNKDIR/tools/cooker cook.rb $RECIPE -d$DEST $2 $3 $4 $5
+ruby -Ku -C $TW_TRUNKDIR/tools/cooker cook.rb $RECIPE -d$DEST -r$TW_TRUNKDIR $2 $3 $4 $5
