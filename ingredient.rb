@@ -17,9 +17,10 @@ end
 
 class Ingredient
 
-	def initialize(filename, type, attributes=nil, raw=false)
+	def initialize(line, type, attributes=nil, raw=false)
 		@attributes = attributes
-		@filename = filename
+		@line = line
+		@filename = line
 		@type = type
 		@raw = raw
 	end
@@ -65,10 +66,20 @@ class Ingredient
 		subtype = type.split('.')
 
 		if(@type == "tline")
-			return @filename
+			return @line
 		elsif(@raw == true)
-			return @filename
-		elsif(subtype[0] == "list")
+			return @line
+		end
+			
+		dirname = File.dirname(@filename)
+		if(dirname =~ /\$TW_ROOT\//)
+			c = dirname.index('$TW_ROOT')
+			dirname = dirname[(c + 8)...dirname.length].strip
+			dirname = Recipe.root + dirname
+		end
+		@filename = File.join(dirname,File.basename(@filename))
+
+		if(subtype[0] == "list")
 		elsif(subtype[0] == "tiddler")
 			if(@filename =~ /\.tiddler/)
 				return to_s_retiddle(subtype[0])
