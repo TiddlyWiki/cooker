@@ -101,6 +101,7 @@ end
 Splitter.quiet = options.quiet
 Splitter.usesubdirectories = options.usesubdirectories
 Splitter.tagsubdirectory = options.tagsubdirectory
+Tiddler.ginsu = true
 
 ARGV.each do |file|
 	splitter = Splitter.new(file, options.dest, options.charset)

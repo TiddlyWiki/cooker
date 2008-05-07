@@ -131,6 +131,7 @@ Recipe.splash = options.splash
 Ingredient.compress = options.compress.strip
 Ingredient.keepallcomments = options.keepallcomments
 Ingredient.stripcomments = options.stripcomments
+Tiddler.ginsu = false
 
 ARGV.each do |file|
 	recipe = Recipe.new(file, options.dest)

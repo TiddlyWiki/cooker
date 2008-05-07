@@ -43,6 +43,10 @@ class Tiddler
 		@@format = format
 	end
 
+	def Tiddler.ginsu=(ginsu)
+		@@ginsu = ginsu
+	end
+
 	def Tiddler.isShadow?(title)
 		return @@shadowNames.include?(title)
 	end
@@ -303,7 +307,10 @@ protected
 		else
 			@contents = divText.sub(/<div.*?>/, "").sub(/<\/div>[\n\r]*/, "").gsub("\\n", "\n").gsub("\\s", "\\")
 		end
-		@contents = CGI::unescapeHTML(@contents.gsub("\r", ""))
+		# only unescape HTML when in ginsu
+		if(@@ginsu)
+			@contents = CGI::unescapeHTML(@contents.gsub("\r", ""))
+		end
 	end
 
 	def parseAllAttributes(divText)
