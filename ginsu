@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ -z "$TW_TRUNKDIR" ]
+then
+	echo 'TW_TRUNKDIR should be set to "/the/path/to/your/tiddlywiki.org/Trunk"'
+	exit 2
+fi
+DEFAULT_FILENAME=index
+FILENAME=${1:-$DEFAULT_FILENAME}
+DEST=$PWD
+RECIPE=$PWD/$FILENAME.html
+
+ruby -C /Users/pauldowney/src/tiddlywiki.org/Trunk/tools/cooker ginsu.rb $RECIPE -d$DEST $2 $3 $4
