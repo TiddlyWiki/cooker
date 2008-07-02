@@ -114,10 +114,12 @@ class Ingredient
 
 protected
 	def to_s_tiddler
+		compress = false
+		compress = true if @attributes == "-c"
 		tiddler = Tiddler.new
 		tiddler.load(@filename)
 		tiddler.setAttributes(@attributes)
-		return tiddler.to_div
+		return tiddler.to_div("tiddler",true,compress)
 	end
 
 	def to_s_plugin
@@ -171,8 +173,12 @@ public
 		if(done)
 			compressed = File.read(outputfile.path)
 		else
-			STDERR.puts("Could not compress with custom_rhino.jar. Cooking failed")
-			exit
+			compressed = input
+			STDERR.puts("Could not compress with custom_rhino.jar.")
+			if(@@compress!="")
+				STDERR.puts("Cooking failed.")
+				exit
+			end
 		end
 		return compressed
 	end

@@ -174,7 +174,7 @@ class Tiddler
 		return line
 	end
 
-	def to_div(subtype="tiddler",escapeHTML=true)
+	def to_div(subtype="tiddler",escapeHTML=true,compress=false)
 		optimizeAttributeStorage = true if(subtype == "shadow")
 		@usePre = true if(subtype == "shadow" && @@format =~ /preshadow/)
 		@usePre = true if(subtype == "tiddler" && @@format =~ /pretiddler/)
@@ -195,6 +195,7 @@ class Tiddler
 		if(@usePre)
 			out << "\n<pre>"
 			lines = @contents
+			lines = Ingredient.rhino(lines) if compress
 			if(escapeHTML)
 				lines = CGI::escapeHTML(lines)
 			end
