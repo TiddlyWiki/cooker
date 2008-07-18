@@ -25,6 +25,7 @@ class Optparse
 		options.root = ""
 		options.splash = false
 		options.section = ""
+		options.ignorecopy = false
 
 		opts = OptionParser.new do |opts|
 			opts.banner = "Cook #{version}\n"
@@ -68,6 +69,10 @@ class Optparse
 
 			opts.on("-k", "--keepallcomments", "Keep all javascript comments") do |keepallcomments|
 				options.keepallcomments = keepallcomments
+			end
+
+			opts.on("-i", "--[no-]ignorecopy", "Ingnore copy command in recipes") do |ignorecopy|
+				options.ignorecopy = ignorecopy
 			end
 
 			opts.on("-q", "--[no-]quiet", "Quiet mode, do not output file names") do |quiet|
@@ -128,6 +133,7 @@ Recipe.quiet = options.quiet
 Recipe.section = options.section
 Recipe.root = options.root
 Recipe.splash = options.splash
+Recipe.ignorecopy = options.ignorecopy
 Ingredient.compress = options.compress.strip
 Ingredient.keepallcomments = options.keepallcomments
 Ingredient.stripcomments = options.stripcomments

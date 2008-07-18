@@ -105,6 +105,14 @@ class Recipe
 		@@quiet = quiet
 	end
 
+	def Recipe.ignorecopy
+		@@ignorecopy
+	end
+
+	def Recipe.ignorecopy=(ignorecopy)
+		@@ignorecopy = ignorecopy
+	end
+
 	def Recipe.root
 		@@root
 	end
@@ -325,11 +333,11 @@ protected
 	end
 
 	def copyFile(ingredient)
-		puts "Copying: " + ingredient.filename if(!@@quiet)
+		puts "Copying: " + ingredient.filename if(!@@quiet && !@@ignorecopy)
 		if ingredient.filename =~ /^https?/
 			downloadFile(ingredient.filename)
 		else
-			File.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename)))
+			File.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename))) if(!@@ignorecopy)
 		end
 	end
 	
