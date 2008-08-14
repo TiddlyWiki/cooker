@@ -29,6 +29,7 @@ class Tiddler
 			"DefaultTiddlers","EditTemplate","GettingStarted","ImportTiddlers","MainMenu",
 			"MarkupPreBody","MarkupPreHead","MarkupPostBody","MarkupPostHead",
 			"OptionsPanel","PageTemplate","PluginManager",
+			"SideBarOptions",
 			"SiteSubtitle","SiteTitle","SiteUrl",
 			"StyleSheet","StyleSheetColors","StyleSheetLayout","StyleSheetLocale","StyleSheetPrint",
 			"TabAll","TabMoreMissing","TabMoreOrphans","TabMoreShadowed","TabTimeline","TabTags",
