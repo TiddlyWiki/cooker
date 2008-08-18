@@ -333,12 +333,14 @@ protected
 	end
 
 	def copyFile(ingredient)
-		puts "Copying: " + ingredient.filename if(!@@quiet && !@@ignorecopy)
-		if ingredient.filename =~ /^https?/
-			downloadFile(ingredient.filename)
-		else
-			File.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename))) if(!@@ignorecopy)
-		end
+    if (!@@ignorecopy)
+      puts "Copying: " + ingredient.filename if(!@@quiet)
+      if ingredient.filename =~ /^https?/
+        downloadFile(ingredient.filename)
+      else
+        File.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename)))
+      end
+    end
 	end
 	
 private
