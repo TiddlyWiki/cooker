@@ -91,55 +91,11 @@ class Tiddler
 	end
 
 	def load(filename)
-		# read in a tiddler from a .js and a .js.meta pair of files
-		begin #use begin rescue block since there may not be a .meta file if the attributes are obtained from the .recipe file
-			open(filename + ".meta") do |infile|
-				infile.each_line do |line|
-					c = line.index(':')
-					if(c != nil)
-						key = line[0, c].strip
-						value = line[(c + 1)...line.length].strip
-						key2 = key
-						k = key.index('.')
-						if(k != nil)
-							key2 = key[(k + 1)...key.length]
-						end
-						if(@sliceAttributeNames.include?(key2))
-							@sliceAttributes[key2] = value
-						else
-							case key
-							when "title"
-								@title = value
-							when "tiddler"
-								@title = value
-							when "modifier"
-								@modifier = value
-							when "created"
-								@created = value
-							when "modified"
-								@modified = value
-							when "tags"
-								@tags = value
-							else
-								@extendedAttributes[key] = value
-							end
-						end
-					end
-				end
-			end
-		rescue
+		if(filename =~ /\.tdw$/)
+			loadTiddlyWeb(filename)
+		else
+			loadJs(filename)
 		end
-		open(filename) do |infile|
-			@contents = ""
-			infile.each_line do |line|
-				@contents << line unless(line.strip =~ /^\/\/#/)
-			end
-			unless filename =~ /^https?/
-				@created ||= infile.mtime.strftime("%Y%m%d%M%S")
-			end
-			#@modified ||= infile.ctime.strftime("%Y%m%d%M%S")
-		end
-		@title ||= File.basename(filename,".js")
 	end
 
 	def loadDiv(filename)
@@ -294,6 +250,47 @@ class Tiddler
 	end
 
 protected
+	def loadJs(filename)
+		# read in a tiddler from a .js and a .js.meta pair of files
+		begin #use begin rescue block since there may not be a .meta file if the attributes are obtained from the .recipe file
+			open(filename + ".meta") do |infile|
+				infile.each_line do |line|
+					readAttributes(line)
+				end
+			end
+		rescue
+		end
+		open(filename) do |infile|
+			@contents = ""
+			infile.each_line do |line|
+				@contents << line unless(line.strip =~ /^\/\/#/)
+			end
+			unless filename =~ /^https?/
+				@created ||= infile.mtime.strftime("%Y%m%d%M%S")
+			end
+			#@modified ||= infile.ctime.strftime("%Y%m%d%M%S")
+		end
+		@title ||= File.basename(filename,".js")
+	end
+
+	def loadTiddlyWeb(filename)
+		# read in tiddler from a TiddlyWeb file
+		@title = File.basename(filename.sub(/\/[0-9]+/,""),".tdw")
+		open(filename) do |file|
+			inAttributes = true
+			@contents = ""
+			file.each_line do |line|
+				if(line.gsub(" ", "").gsub("\r", "")=="\n")
+					inAttributes = false
+				end
+				if(inAttributes)
+					readAttributes(line)
+				else
+					@contents << line
+				end
+			end
+		end
+	end
 	def from_div(divText)
 		parseAllAttributes(divText)
 		parseContent(divText)
@@ -367,6 +364,7 @@ protected
 	def modifier
 		@modifier ||= ""
 	end
+
 private
 	def wikify(text)
 		text = text.gsub(/\n\n/,"<br /><br />")
@@ -376,5 +374,38 @@ private
 		
 		text = text.gsub(/\[\[([\w -]+)(?:\|[\w -]+)?\]\]/,"<a class=\"tiddlyLink tiddlyLinkExisting\" href=\"javascript:;\" title=\"\\1\">\\1</a>")
 		text = text + "<br /><br />"
+	end
+	
+	def readAttributes(line)
+		c = line.index(':')
+		if(c != nil)
+			key = line[0, c].strip
+			value = line[(c + 1)...line.length].strip
+			key2 = key
+			k = key.index('.')
+			if(k != nil)
+				key2 = key[(k + 1)...key.length]
+			end
+			if(@sliceAttributeNames.include?(key2))
+				@sliceAttributes[key2] = value
+			else
+				case key
+				when "title"
+					@title = value
+				when "tiddler"
+					@title = value
+				when "modifier"
+					@modifier = value
+				when "created"
+					@created = value
+				when "modified"
+					@modified = value
+				when "tags"
+					@tags = value
+				else
+					@extendedAttributes[key] = value
+				end
+			end
+		end
 	end
 end
