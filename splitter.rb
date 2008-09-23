@@ -40,7 +40,7 @@ class Splitter
 
 
 	def split
-		recipes = {"main" => "", "shadows" => "", "plugins" => "", "content" => "", "feeds" => "", "themes" => "", "tags" => ""}
+		recipes = {"main" => "", "shadows" => "", "plugins" => "", "content" => "", "feeds" => "", "themes" => "", "tags" => "", "templates" => ""}
 
 		tiddlerCount = readStoreArea(recipes)
 		if(tiddlerCount == 0)
@@ -79,7 +79,7 @@ class Splitter
 private
 	def writeTiddler(tiddler, recipes)
 		dirname = @dirname
-		tiddlerFilename = tiddler.title.to_s.gsub(/[ <>]/,"_").gsub(/\t/,"%09").gsub(/#/,"%23").gsub(/%/,"%25").gsub(/\*/,"%2a").gsub(/,/,"%2c").gsub(/\//,"%2f").gsub(/:/,"%3a").gsub(/</,"%3c").gsub(/>/,"%3e").gsub(/\?/,"%3f")
+		tiddlerFilename = tiddler.title.to_s.gsub(/[ <>:]/,"_").gsub(/\t/,"%09").gsub(/#/,"%23").gsub(/%/,"%25").gsub(/\*/,"%2a").gsub(/,/,"%2c").gsub(/\//,"%2f").gsub(/</,"%3c").gsub(/>/,"%3e").gsub(/\?/,"%3f")
 		tiddlerFilename = @conv.iconv(tiddlerFilename)
 		if(tiddler.tags =~ /systemConfig/)
 			dirname = @dirname
@@ -106,6 +106,8 @@ private
 				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["tags"], @@tagsubdirectory)
 			elsif(Tiddler.isShadow?(tiddler.title))
 				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["shadows"], "shadows")
+			elsif(tiddler.title =~ /Template:.*/)
+				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["templates"], "templates")
 			else
 				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["content"], "content")
 			end
