@@ -81,9 +81,9 @@ class Ingredient
 
 		if(subtype[0] == "list")
 		elsif(subtype[0] == "tiddler")
-			if(@filename =~ /\.tiddler/)
+			if(@filename =~ /\.tiddler$/)
 				return to_s_retiddle(subtype[0])
-			elsif(@filename =~/\.html/)
+			elsif(@filename =~ /\.html$/)
 				out = ''
 				tiddlers = Splitter.extractTiddlers(@filename,URI.parse(@filename).fragment.split("%20"))
 				tiddlers.each do |tiddler|
@@ -94,7 +94,7 @@ class Ingredient
 				return to_s_tiddler
 			end
 		elsif(subtype[0] == "shadow")
-			if(@filename =~ /\.tiddler/)
+			if(@filename =~ /\.tiddler$/)
 				return to_s_retiddle(subtype[0])
 			else
 				# have a non-tidler in the shadow area, so output it raw
@@ -103,7 +103,7 @@ class Ingredient
 		elsif(subtype[0] == "plugin")
 			return to_s_plugin
 		else
-			if(@filename =~ /\.tiddler/)
+			if(@filename =~ /\.tiddler$/)
 				# not in tiddler, shadow or plugin, so output raw content of tiddler
 				return to_s_raw(subtype[0])
 			else
