@@ -47,6 +47,10 @@ class Tiddler
 	def Tiddler.ginsu=(ginsu)
 		@@ginsu = ginsu
 	end
+	
+	def Tiddler.usefiletime=(usefiletime)
+		@@usefiletime = usefiletime
+	end
 
 	def Tiddler.isShadow?(title)
 		return @@shadowNames.include?(title)
@@ -268,7 +272,9 @@ protected
 			unless filename =~ /^https?/
 				@created ||= infile.mtime.strftime("%Y%m%d%M%S")
 			end
-			#@modified ||= infile.ctime.strftime("%Y%m%d%M%S")
+			if(@@usefiletime)
+				@modified = infile.mtime.utc.strftime("%Y%m%d%H%M")
+			end
 		end
 		@title ||= File.basename(filename,".js")
 	end

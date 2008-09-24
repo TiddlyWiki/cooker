@@ -26,6 +26,7 @@ class Optparse
 		options.splash = false
 		options.section = ""
 		options.ignorecopy = false
+		options.usefiletime = false
 
 		opts = OptionParser.new do |opts|
 			opts.banner = "Cook #{version}\n"
@@ -81,6 +82,10 @@ class Optparse
 
 			opts.on("-s", "--[no-]stripcommets", "Strip comments") do |stripcomments|
 				options.stripcomments = stripcomments
+			end
+			
+			opts.on("-t","--time modified from file system") do |usefiletime|
+				options.usefiletime = usefiletime
 			end
 
 			options.help = opts
@@ -138,6 +143,7 @@ Ingredient.compress = options.compress.strip
 Ingredient.keepallcomments = options.keepallcomments
 Ingredient.stripcomments = options.stripcomments
 Tiddler.ginsu = false
+Tiddler.usefiletime = options.usefiletime
 
 ARGV.each do |file|
 	recipe = Recipe.new(file, options.dest)
