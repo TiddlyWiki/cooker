@@ -270,7 +270,7 @@ protected
 				@contents << line unless(line.strip =~ /^\/\/#/)
 			end
 			unless filename =~ /^https?/
-				@created ||= infile.mtime.strftime("%Y%m%d%M%S")
+				@created ||= infile.mtime.utc.strftime("%Y%m%d%H%M")
 			end
 			if(@@usefiletime)
 				@modified = infile.mtime.utc.strftime("%Y%m%d%H%M")
