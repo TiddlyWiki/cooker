@@ -9,4 +9,4 @@ FILENAME=${1:-$DEFAULT_FILENAME}
 DEST=$PWD
 RECIPE=$PWD/$FILENAME.html
 
-ruby -C /Users/pauldowney/src/tiddlywiki.org/Trunk/tools/cooker ginsu.rb $RECIPE -d$DEST $2 $3 $4
+ruby -C $TW_TRUNKDIR/tools/cooker ginsu.rb $RECIPE -d$DEST $2 $3 $4
