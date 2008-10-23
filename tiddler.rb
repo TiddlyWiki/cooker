@@ -253,6 +253,14 @@ class Tiddler
 		return out
 	end
 
+	def appendJs(filename)
+		open(filename) do |infile|
+			infile.each_line do |line|
+				@contents << line unless(line.strip =~ /^\/\/#/)
+			end
+		end
+	end
+
 protected
 	def loadJs(filename)
 		# read in a tiddler from a .js and a .js.meta pair of files

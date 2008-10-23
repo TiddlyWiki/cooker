@@ -118,6 +118,15 @@ protected
 		compress = true if @attributes == "-c"
 		tiddler = Tiddler.new
 		tiddler.load(@filename)
+		if @attributes
+			params = @attributes.split(" ")
+			params.each do |param|
+				if(param =~ /\.js$/)
+					jsFile = File.join(File.dirname(@filename),param)
+					tiddler.appendJs(jsFile)
+				end
+			end
+		end
 		tiddler.setAttributes(@attributes)
 		return tiddler.to_div("tiddler",true,compress)
 	end
