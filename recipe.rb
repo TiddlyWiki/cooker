@@ -68,7 +68,7 @@ class Recipe
 						if(@@splash  && ingredient.filename=="prebody")
 							writeSplash(out)
 						end
-						if(Ingredient.compress=~/[pr]+/ && ingredient.filename == "js")
+						if((Ingredient.compress=~/[pr]+/ && ingredient.filename == "js") || (Ingredient.compressplugins=~/[pr]+/ && ingredient.filename == "jquery"))
 							block = ""
 							if(@addons.has_key?(ingredient.filename))
 								@addons.fetch(ingredient.filename).each do |ingredient| 
@@ -76,9 +76,9 @@ class Recipe
 									block += b if(b)
 								end
 							end
-							if(Ingredient.compress=~/[pr]+/)
+							if(Ingredient.compress=~/[pr]+/ || Ingredient.compressplugins=~/[pr]+/)
 								block = Ingredient.rhino(block)
-								if(Ingredient.compress=~/.?p.?/)
+								if(Ingredient.compress=~/.?p.?/ || Ingredient.compressplugins=~/.?p.?/)
 									block = Ingredient.packr(block)
 								end
 							end
@@ -119,6 +119,14 @@ class Recipe
 
 	def Recipe.root=(root)
 		@@root = root
+	end
+
+	def Recipe.plugins
+		@@plugins
+	end
+
+	def Recipe.plugins=(plugins)
+		@@plugins = plugins
 	end
 
 	def Recipe.splash

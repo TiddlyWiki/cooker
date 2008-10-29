@@ -53,6 +53,14 @@ class Ingredient
 		@@compress = compress
 	end
 	
+	def Ingredient.compressplugins
+		@@compressplugins
+	end
+
+	def Ingredient.compressplugins=(compressplugins)
+		@@compressplugins = compressplugins
+	end
+	
 	def Ingredient.keepallcomments
 		@@keepallcomments
 	end

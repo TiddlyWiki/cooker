@@ -22,7 +22,9 @@ class Optparse
 		options.quiet = false
 		options.stripcomments = false
 		options.compress = ""
+		options.compressplugins = ""
 		options.root = ""
+		options.plugins = ""
 		options.splash = false
 		options.section = ""
 		options.ignorecopy = false
@@ -38,6 +40,10 @@ class Optparse
 				options.root = root
 			end
 
+			#opts.on("-p", "--plugins PLUGINS", "jQuery plugin path") do |plugins|
+			#	options.plugins = plugins
+			#end
+
 			opts.on("-c", "--compress COMPRESS", "Compress javascript, use -c, -cr or -crp") do |compress|
 				# three options available
 				# F - compress each .js file individually using rhino
@@ -46,6 +52,15 @@ class Optparse
 				# P and R may be combined, eg -c PR
 				# only P implies PR, Packr compression is not performed without Rhino compression first
 				options.compress = compress.downcase
+			end
+			
+			opts.on("-C", "--cplugins COMPRESSPLUGINS", "Compress javascript plugins, use -C, -Cr or -Crp") do |compressplugins|
+				# three options available
+				# R - compress .js files as a single block
+				# P - compress .js files as a single block using packr (not yet available)
+				# P and R may be combined, eg -c PR
+				# only P implies PR, Packr compression is not performed without Rhino compression first
+				options.compressplugins = compressplugins.downcase
 			end
 			
 			opts.on("-d", "--dest DESTINATION", "Destination directory") do |dest|
@@ -137,9 +152,11 @@ Tiddler.format = options.format
 Recipe.quiet = options.quiet
 Recipe.section = options.section
 Recipe.root = options.root
+Recipe.plugins = options.plugins
 Recipe.splash = options.splash
 Recipe.ignorecopy = options.ignorecopy
 Ingredient.compress = options.compress.strip
+Ingredient.compressplugins = options.compressplugins.strip
 Ingredient.keepallcomments = options.keepallcomments
 Ingredient.stripcomments = options.stripcomments
 Tiddler.ginsu = false
