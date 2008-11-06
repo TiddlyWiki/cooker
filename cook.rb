@@ -51,16 +51,16 @@ class Optparse
 				# P - compress .js files as a single block using packr (not yet available)
 				# P and R may be combined, eg -c PR
 				# only P implies PR, Packr compression is not performed without Rhino compression first
-				options.compress = compress.downcase
+				options.compress = compress.downcase.strip
 			end
 			
-			opts.on("-C", "--cplugins COMPRESSPLUGINS", "Compress javascript plugins, use -C, -Cr or -Crp") do |compressplugins|
+			opts.on("-C", "--cplugins CPLUGINS", "Compress javascript plugins, use -C, -Cr or -Crp") do |compressplugins|
 				# three options available
 				# R - compress .js files as a single block
 				# P - compress .js files as a single block using packr (not yet available)
 				# P and R may be combined, eg -c PR
 				# only P implies PR, Packr compression is not performed without Rhino compression first
-				options.compressplugins = compressplugins.downcase
+				options.compressplugins = compressplugins.strip
 			end
 			
 			opts.on("-d", "--dest DESTINATION", "Destination directory") do |dest|
@@ -155,8 +155,8 @@ Recipe.root = options.root
 Recipe.plugins = options.plugins
 Recipe.splash = options.splash
 Recipe.ignorecopy = options.ignorecopy
-Ingredient.compress = options.compress.strip
-Ingredient.compressplugins = options.compressplugins.strip
+Ingredient.compress = options.compress
+Ingredient.compressplugins = options.compressplugins
 Ingredient.keepallcomments = options.keepallcomments
 Ingredient.stripcomments = options.stripcomments
 Tiddler.ginsu = false
