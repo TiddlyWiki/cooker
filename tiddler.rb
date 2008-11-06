@@ -151,7 +151,11 @@ class Tiddler
 			out << " created=\"#{@created}\"" if(@created)
 			out << " tags=\"#{@tags}\""
 		end
-		@extendedAttributes.each_pair { |key, value| out << " #{key}=\"#{value}\"" }
+		@extendedAttributes.each_pair do |key, value|
+			if(key!="changecount")
+				out << " #{key}=\"#{value}\""
+			end
+		end
 		out << ">"
 		if(@usePre)
 			out << "\n<pre>"
