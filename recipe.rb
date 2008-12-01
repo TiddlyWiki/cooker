@@ -320,10 +320,12 @@ protected
 		defaultTiddlers.each do |title|
 			tiddler = Tiddler.new
 			filename = @defaultTiddlersFilename.sub(/DefaultTiddlers/,title)
+			if(!Tiddler.isShadow?(title))
+				filename = filename.sub(/shadows/,"content")
+			end
 			tiddler.loadDiv(filename);
 			tiddlers += tiddler.to_html(viewTemplate.contents)
 		end
-		#puts "tiddlers:"+tiddlers
 
 		splash = splash.gsub(/<!--\{\{\{-->/,"");
 		splash = splash.gsub(/<!--\}\}\}-->/,"");
