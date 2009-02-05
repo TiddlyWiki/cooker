@@ -71,7 +71,7 @@ class Recipe
 						if((Ingredient.compress=~/[pr]+/ && ingredient.filename == "js") || (Ingredient.compressplugins=~/[pr]+/ && ingredient.filename == "jquery"))
 							block = ""
 							if(@addons.has_key?(ingredient.filename))
-								@addons.fetch(ingredient.filename).each do |ingredient| 
+								@addons.fetch(ingredient.filename).each do |ingredient|
 									b = writeToDish(block, ingredient)
 									block += b if(b)
 								end
@@ -85,7 +85,9 @@ class Recipe
 							out << block
 						else
 							if(@addons.has_key?(ingredient.filename))
-								@addons.fetch(ingredient.filename).each{ |ingredient| writeToDish(out, ingredient) }
+								@addons.fetch(ingredient.filename).each do |ingredient|
+									writeToDish(out, ingredient)
+								end
 							end
 						end
 					else
@@ -226,7 +228,7 @@ protected
 	def loadSubrecipe(subrecipename, isTemplate)
 		recipe = Recipe.new(subrecipename, @outdir, isTemplate)
 		@ingredients = @ingredients + recipe.ingredients
-		recipe.addons.each { |key, value| addAddOns(key, value) }
+		recipe.addons.each { |key, value, attributes| addAddOns(key, value, attributes) }
 	end
 
 	def addAddOns(key, value, attributes=nil, raw=false)
@@ -343,16 +345,16 @@ protected
 	end
 
 	def copyFile(ingredient)
-    if (!@@ignorecopy)
-      puts "Copying: " + ingredient.filename if(!@@quiet)
-      if ingredient.filename =~ /^https?/
-        downloadFile(ingredient.filename)
-      else
-        File.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename)))
-      end
-    end
+		if(!@@ignorecopy)
+			puts "Copying: " + ingredient.filename if(!@@quiet)
+			if ingredient.filename =~ /^https?/
+				downloadFile(ingredient.filename)
+			else
+				File.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename)))
+			end
+		end
 	end
-	
+
 private
 	def downloadFile(url)
 		uri = URI.parse(url)

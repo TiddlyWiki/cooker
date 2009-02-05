@@ -29,6 +29,10 @@ class Ingredient
 		@filename
 	end
 
+	def attributes
+		@attributes
+	end
+
 	def type
 		@type
 	end
@@ -172,8 +176,12 @@ protected
 					out << line unless(line.strip =~ /^\/\/#/)
 				end
 			end
-			if(@@compress=="f" && subtype == "js" && @filename !~ /\/Lingo/&& @filename !~ /\/locale/)
+			if(@@compress=="f" && subtype == "js" && @filename !~ /\/Lingo/ && @filename !~ /\/locale/)
 				out = Ingredient.rhino(out)
+			end
+			if(subtype == "jshead" && @filename !~ /\.pack\./ && @filename !~ /\.min\./)
+				out = Ingredient.rhino(out)
+				out = Ingredient.packr(out)
 			end
 			return out
 		end
