@@ -53,13 +53,9 @@ class Recipe
 							title = ""
 							if(@tiddlers["SiteTitle"])
 								title << @tiddlers["SiteTitle"].contents
-								if(@tiddlers["SiteSubtitle"])
-									title << " - "
-								end
+								title << " - " if(@tiddlers["SiteSubtitle"])
 							end
-							if(@tiddlers["SiteSubtitle"])
-								title << @tiddlers["SiteSubtitle"].contents
-							end
+							title << @tiddlers["SiteSubtitle"].contents if(@tiddlers["SiteSubtitle"])
 							out << title + "\n" if title
 						end
 						if(@@splash  && ingredient.filename=="posthead")
@@ -68,28 +64,22 @@ class Recipe
 						if(@@splash  && ingredient.filename=="prebody")
 							writeSplash(out)
 						end
-						if((Ingredient.compress=~/[pr]+/ && ingredient.filename == "js") || (Ingredient.compressplugins=~/[pr]+/ && ingredient.filename == "jquery"))
-							block = ""
-							if(@addons.has_key?(ingredient.filename))
-								@addons.fetch(ingredient.filename).each do |ingredient|
-									b = writeToDish(block, ingredient)
-									block += b if(b)
-								end
+						block = ""
+						if(@addons.has_key?(ingredient.filename))
+							@addons.fetch(ingredient.filename).each do |ingredient|
+								b = writeToDish(block, ingredient)
+								block += b if(b)
 							end
+						end
+						if((Ingredient.compress=~/[pr]+/ && ingredient.filename == "js") || (Ingredient.compressplugins=~/[pr]+/ && ingredient.filename == "jquery"))
 							if(Ingredient.compress=~/[pr]+/ || Ingredient.compressplugins=~/[pr]+/)
 								block = Ingredient.rhino(block)
 								if(Ingredient.compress=~/.?p.?/ || Ingredient.compressplugins=~/.?p.?/)
 									block = Ingredient.packr(block)
 								end
 							end
-							out << block
-						else
-							if(@addons.has_key?(ingredient.filename))
-								@addons.fetch(ingredient.filename).each do |ingredient|
-									writeToDish(out, ingredient)
-								end
-							end
 						end
+						out << block
 					else
 						writeToDish(out, ingredient)
 					end
