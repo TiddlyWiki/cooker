@@ -95,10 +95,10 @@ class Tiddler
 	end
 
 	def load(filename)
-		if(filename =~ /\.tdw$/)
-			loadTiddlyWeb(filename)
-		else
+		if(filename =~ /\.js$/)
 			loadJs(filename)
+		else
+			loadTiddlyWeb(filename)
 		end
 	end
 
