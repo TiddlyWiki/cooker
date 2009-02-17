@@ -65,6 +65,14 @@ class Ingredient
 		@@compressplugins = compressplugins
 	end
 	
+	def Ingredient.compressdeprecated
+		@@compressdeprecated
+	end
+
+	def Ingredient.compressdeprecated=(compressdeprecated)
+		@@compressdeprecated = compressdeprecated
+	end
+
 	def Ingredient.keepallcomments
 		@@keepallcomments
 	end

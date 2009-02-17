@@ -8,7 +8,7 @@ require 'recipe'
 require 'optparse'
 require 'ostruct'
 
-$VERSION = "1.1.0"
+$VERSION = "1.1.1"
 $BUILD = "$Revision$"
 
 class Optparse
@@ -23,6 +23,7 @@ class Optparse
 		options.stripcomments = false
 		options.compress = ""
 		options.compressplugins = ""
+		options.compressdeprecated = ""
 		options.root = ""
 		options.plugins = ""
 		options.splash = false
@@ -61,6 +62,15 @@ class Optparse
 				# P and R may be combined, eg -c PR
 				# only P implies PR, Packr compression is not performed without Rhino compression first
 				options.compressplugins = compressplugins.strip
+			end
+			
+			opts.on("-D", "--deprecated DEPRECATED", "Compress deprecated javascript, use -D, -Dr or -Drp") do |compressdeprecated|
+				# three options available
+				# R - compress .js files as a single block
+				# P - compress .js files as a single block using packr (not yet available)
+				# P and R may be combined, eg -c PR
+				# only P implies PR, Packr compression is not performed without Rhino compression first
+				options.compressdeprecated = compressdeprecated.strip
 			end
 			
 			opts.on("-d", "--dest DESTINATION", "Destination directory") do |dest|
@@ -157,6 +167,7 @@ Recipe.splash = options.splash
 Recipe.ignorecopy = options.ignorecopy
 Ingredient.compress = options.compress
 Ingredient.compressplugins = options.compressplugins
+Ingredient.compressdeprecated = options.compressdeprecated
 Ingredient.keepallcomments = options.keepallcomments
 Ingredient.stripcomments = options.stripcomments
 Tiddler.ginsu = false

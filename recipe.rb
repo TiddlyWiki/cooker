@@ -64,17 +64,19 @@ class Recipe
 						if(@@splash  && ingredient.filename=="prebody")
 							writeSplash(out)
 						end
+						type = ingredient.filename
 						block = ""
 						if(@addons.has_key?(ingredient.filename))
 							@addons.fetch(ingredient.filename).each do |ingredient|
+								type = ingredient.type
 								b = writeToDish(block, ingredient)
 								block += b if(b)
 							end
 						end
-						if((Ingredient.compress=~/[pr]+/ && ingredient.filename == "js") || (Ingredient.compressplugins=~/[pr]+/ && ingredient.filename == "jquery"))
-							if(Ingredient.compress=~/[pr]+/ || Ingredient.compressplugins=~/[pr]+/)
+						if((Ingredient.compress=~/[pr]+/ && type == "js") || (Ingredient.compressplugins=~/[pr]+/ && type == "jquery") || (Ingredient.compressdeprecated=~/[pr]+/ && type == "jsdeprecated"))
+							if(Ingredient.compress=~/[pr]+/ || Ingredient.compressplugins=~/[pr]+/ || Ingredient.compressdeprecated=~/[pr]+/)
 								block = Ingredient.rhino(block)
-								if(Ingredient.compress=~/.?p.?/ || Ingredient.compressplugins=~/.?p.?/)
+								if(Ingredient.compress=~/.?p.?/ || Ingredient.compressplugins=~/.?p.?/ || Ingredient.compressdeprecated=~/.?p.?/)
 									block = Ingredient.packr(block)
 								end
 							end
