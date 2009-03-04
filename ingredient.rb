@@ -73,6 +73,14 @@ class Ingredient
 		@@compressdeprecated = compressdeprecated
 	end
 
+	def Ingredient.compresshead
+		@@compresshead
+	end
+
+	def Ingredient.compresshead=(compresshead)
+		@@compresshead = compresshead
+	end
+	
 	def Ingredient.keepallcomments
 		@@keepallcomments
 	end
@@ -187,9 +195,20 @@ protected
 			if(@@compress=="f" && subtype == "js" && @filename !~ /\/Lingo/ && @filename !~ /\/locale/)
 				out = Ingredient.rhino(out)
 			end
-			if(subtype == "jshead" && @filename !~ /\.pack\./ && @filename !~ /\.min\./)
-				out = Ingredient.rhino(out)
-				out = Ingredient.packr(out)
+			if(subtype == "jshead" && @@compresshead)
+				if(@filename !~ /\.min\./)
+					out = Ingredient.rhino(out)
+				end
+				if(@filename !~ /\.pack\./)
+					comment = ""
+					re = /^\/\*(.*?)\*\//m
+					m = re.match(out)
+					while m
+						comment += m[0] + "\n"
+						m = re.match(m.post_match)
+					end
+					out = comment + Ingredient.packr(out)
+				end
 			end
 			return out
 		end

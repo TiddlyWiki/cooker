@@ -24,6 +24,7 @@ class Optparse
 		options.compress = ""
 		options.compressplugins = ""
 		options.compressdeprecated = ""
+		options.compresshead = ""
 		options.root = ""
 		options.plugins = ""
 		options.splash = false
@@ -54,7 +55,7 @@ class Optparse
 				# only P implies PR, Packr compression is not performed without Rhino compression first
 				options.compress = compress.downcase.strip
 			end
-			
+
 			opts.on("-C", "--cplugins CPLUGINS", "Compress javascript plugins, use -C, -Cr or -Crp") do |compressplugins|
 				# three options available
 				# R - compress .js files as a single block
@@ -63,7 +64,7 @@ class Optparse
 				# only P implies PR, Packr compression is not performed without Rhino compression first
 				options.compressplugins = compressplugins.strip
 			end
-			
+
 			opts.on("-D", "--deprecated DEPRECATED", "Compress deprecated javascript, use -D, -Dr or -Drp") do |compressdeprecated|
 				# three options available
 				# R - compress .js files as a single block
@@ -72,7 +73,11 @@ class Optparse
 				# only P implies PR, Packr compression is not performed without Rhino compression first
 				options.compressdeprecated = compressdeprecated.strip
 			end
-			
+
+			opts.on("-H", "--[no-]HEAD", "Compress jshead, use -H") do |compresshead|
+				options.compresshead = compresshead
+			end
+
 			opts.on("-d", "--dest DESTINATION", "Destination directory") do |dest|
 				if(!File.exist?(dest))
 					STDERR.puts("ERROR - Destination directory '#{dest}' does not exist.")
@@ -168,6 +173,7 @@ Recipe.ignorecopy = options.ignorecopy
 Ingredient.compress = options.compress
 Ingredient.compressplugins = options.compressplugins
 Ingredient.compressdeprecated = options.compressdeprecated
+Ingredient.compresshead = options.compresshead
 Ingredient.keepallcomments = options.keepallcomments
 Ingredient.stripcomments = options.stripcomments
 Tiddler.ginsu = false
