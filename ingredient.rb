@@ -195,7 +195,7 @@ protected
 			if(@@compress=="f" && subtype == "js" && @filename !~ /\/Lingo/ && @filename !~ /\/locale/)
 				out = Ingredient.rhino(out)
 			end
-			if(subtype == "jshead" && @@compresshead)
+			if(subtype == "jshead" && @@compresshead == true)
 				if(@filename !~ /\.min\./)
 					out = Ingredient.rhino(out)
 				end
