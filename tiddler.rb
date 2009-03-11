@@ -164,7 +164,7 @@ class Tiddler
 			if(escapeHTML)
 				lines = CGI::escapeHTML(lines)
 			end
-			lines = (lines.gsub("\r", "")).split("\n")
+			lines = (lines.gsub("\r", "")).split("\n",-1)
 			last = lines.pop
 			lines.each { |line| out << line << "\n" }
 			out << last if(last)
