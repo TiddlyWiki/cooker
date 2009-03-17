@@ -1,0 +1,9 @@
+To run all tests, cd to this directory and do ./test_suite
+
+Should be fully backwards compatible. I did take a look at all uses of cook.rb under Trunk.
+
+test6_root_first has some further thoughts.
+
+Regards,
+
+Richard

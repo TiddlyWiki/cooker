@@ -1,0 +1,9 @@
+#!/bin/bash
+
+RECIPE=stuff/wizzo.html.recipe
+DEST=stuff/
+export TW_HTML=$PWD/stuff/html
+export TW_ONE=$PWD/stuff/one
+export TW_TWO=$PWD/stuff/two
+
+cook.rb $RECIPE -d$DEST

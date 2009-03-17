@@ -1,0 +1,8 @@
+#!/bin/bash
+
+RECIPE=stuff/standard.html.recipe
+DEST=stuff/
+export TW_COOK_OUTPUT_PREFIX="step_on_"
+export TW_TRUNKDIR=$PWD/stuff/one
+
+cook.rb $RECIPE -d$DEST

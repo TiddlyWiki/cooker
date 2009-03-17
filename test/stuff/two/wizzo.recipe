@@ -1,0 +1,3 @@
+template: $TW_HTML/minimal.template.html
+title: $TW_ONE/test.txt
+prebody: $TW_HTML/test.txt

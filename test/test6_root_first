@@ -1,0 +1,18 @@
+#!/bin/bash
+
+RECIPE=stuff/standard.html.recipe
+DEST=stuff/
+export TW_COOK_OUTPUT_PREFIX="tidy_up_"
+
+# in due course $TW_TRUNKDIR should disappear in scripts and in the environment
+# in which case the following line in cook.rb can be simplified:
+# ENV['TW_ROOT'] = options.root || ENV['TW_ROOT'] || ENV['TW_TRUNKDIR']
+# becomes
+# ENV['TW_ROOT'] = options.root || ENV['TW_ROOT']
+# or comes out completely because the -r option is always to be ignored
+# this would means $TW_ROOT set to whatever $TW_TRUNKDIR was in the past
+
+export TW_TRUNKDIR=$PWD/stuff/one
+export TW_ROOT=$PWD/stuff/two
+
+cook.rb $RECIPE -d$DEST

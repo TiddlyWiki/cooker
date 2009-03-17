@@ -1,0 +1,7 @@
+#!/bin/bash
+
+RECIPE=stuff/minimal.html.recipe
+DEST=stuff/
+export TW_COOK_OUTPUT_PREFIX="barely_"
+
+cook.rb $RECIPE -d$DEST

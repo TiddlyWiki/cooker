@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# when we say it's an idiom we're not necessarily saying it's beautiful
+
+RECIPE=stuff/standard.html.recipe
+DEST=stuff/
+export TW_TRUNKDIR=$PWD/stuff/one
+
+cook.rb $RECIPE -d$DEST -r$TW_TRUNKDIR

@@ -1,0 +1,3 @@
+template: minimal.template.html
+title: test.txt
+prebody: $TW_ROOT/test.txt

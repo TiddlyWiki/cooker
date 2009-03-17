@@ -1,0 +1,2 @@
+recipe: $TW_TWO/wizzo.recipe
+postscript: $TW_ONE/test.txt

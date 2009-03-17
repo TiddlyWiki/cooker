@@ -1,0 +1,9 @@
+#!/bin/bash
+export PATH=../:$PATH$
+./test1_help
+./test2_env
+./test3_no_env
+./test4_current_idiom
+./test5_no_root
+./test6_root_first
+./test7_flexible

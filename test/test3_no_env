@@ -1,0 +1,6 @@
+#!/bin/bash
+
+RECIPE=stuff/minimal.html.recipe
+DEST=stuff/
+
+cook.rb $RECIPE -d$DEST
