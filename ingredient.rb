@@ -99,13 +99,7 @@ class Ingredient
 			return @line
 		end
 			
-		dirname = File.dirname(@filename)
-		if(dirname =~ /\$TW_ROOT\//)
-			c = dirname.index('$TW_ROOT')
-			dirname = dirname[(c + 8)...dirname.length].strip
-			dirname = Recipe.root + dirname
-		end
-		@filename = File.join(dirname,File.basename(@filename))
+		@filename = Recipe.injectEnv(@filename)
 
 		if(subtype[0] == "list")
 		elsif(subtype[0] == "tiddler")

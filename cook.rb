@@ -8,7 +8,7 @@ require 'recipe'
 require 'optparse'
 require 'ostruct'
 
-$VERSION = "1.1.1"
+$VERSION = "1.1.10001"
 $BUILD = "$Revision$"
 
 class Optparse
@@ -25,7 +25,6 @@ class Optparse
 		options.compressplugins = ""
 		options.compressdeprecated = ""
 		options.compresshead = ""
-		options.root = ""
 		options.plugins = ""
 		options.splash = false
 		options.section = ""
@@ -114,12 +113,13 @@ class Optparse
 				options.stripcomments = stripcomments
 			end
 			
-			opts.on("-t","--time modified from file system") do |usefiletime|
+			opts.on("-t","--time", "Time modified from file system") do |usefiletime|
 				options.usefiletime = usefiletime
 			end
 
 			options.help = opts
 			opts.on_tail("-h", "--help", "Show this message") do
+				puts options.help
 				exit 64
 			end
 
@@ -166,7 +166,7 @@ end
 Tiddler.format = options.format
 Recipe.quiet = options.quiet
 Recipe.section = options.section
-Recipe.root = options.root
+ENV['TW_ROOT'] = options.root || ENV['TW_ROOT'] || ENV['TW_TRUNKDIR']
 Recipe.plugins = options.plugins
 Recipe.splash = options.splash
 Recipe.ignorecopy = options.ignorecopy

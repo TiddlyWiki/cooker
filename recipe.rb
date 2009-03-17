@@ -10,19 +10,13 @@ require 'uri'
 
 class Recipe
 	def initialize(filename, outdir=nil, isTemplate=false)
-		@filename = filename
 		@outdir = outdir ||= ""
 		@ingredients = Array.new
 		@addons = Hash.new
 		@tiddlers = Hash.new
 		@defaultTiddlersFilename = ""
 		@dirname = File.dirname(filename)
-		if(@dirname =~ /\$TW_ROOT\//)
-			c = @dirname.index('$TW_ROOT')
-			@dirname = @dirname[(c + 8)...@dirname.length].strip
-			@dirname = @@root + @dirname
-		end
-		@filename = File.join(@dirname,File.basename(filename))
+		@filename = Recipe.injectEnv(filename)
 		open(@filename) do |file|
 			file.each_line { |line| genIngredient(@dirname, line, isTemplate) }
 		end
@@ -91,6 +85,17 @@ class Recipe
 		@addons.fetch("copy", Array.new).each { |ingredient| copyFile(ingredient) }
 	end
 
+	def Recipe.env(name)
+		ENV[name] || ''
+	end
+
+	def Recipe.injectEnv(path)
+		while path =~ /\$.*?\//
+			path = env($&[1...-1]) + '/' + $'
+		end
+		path
+	end
+
 	def Recipe.quiet
 		@@quiet
 	end
@@ -145,7 +150,7 @@ protected
 	end
 
 	def outfilename
-		outdir + File.basename(@filename.sub(".recipe", ""))
+		outdir + Recipe.env('TW_COOK_OUTPUT_PREFIX') + File.basename(@filename.sub(".recipe", ""))
 	end
 
 	def ingredients
