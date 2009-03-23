@@ -15,8 +15,8 @@ class Recipe
 		@addons = Hash.new
 		@tiddlers = Hash.new
 		@defaultTiddlersFilename = ""
-		@dirname = File.dirname(filename)
 		@filename = Recipe.injectEnv(filename)
+		@dirname = File.dirname(@filename)
 		open(@filename) do |file|
 			file.each_line { |line| genIngredient(@dirname, line, isTemplate) }
 		end
