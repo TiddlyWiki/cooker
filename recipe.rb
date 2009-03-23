@@ -93,7 +93,7 @@ class Recipe
 		while path =~ /\$.*?\//
 			path = env($&[1...-1]) + '/' + $'
 		end
-		path
+		return path
 	end
 
 	def Recipe.quiet
@@ -185,15 +185,20 @@ protected
 				@ingredients << Ingredient.new(line.strip.slice(1..-2), "list")
 			elsif(line =~ /template\:/)
 				value = line.sub(/template\:/, "").strip
-				path = value =~ /^https?/ ? "" : dirname
-				loadSubrecipe(File.join(path, value),true)
+				if(value =~ /^https?/ || value[0,1]=='/')
+					file =  value
+				else
+					file = File.join(dirname,value)
+				end
+				loadSubrecipe(file,true)
 			elsif(line =~ /recipe\:/)
 				value = line.sub(/recipe\:/, "").strip
-				unless value =~ /^https?/
-					loadSubrecipe(File.join(dirname, value),false)
+				if(value =~ /^https?/ || value[0,1]=='/')
+					file =  value
 				else
-					loadSubrecipe(value,false)
+					file = File.join(dirname,value)
 				end
+				loadSubrecipe(file,false)
 			elsif(line =~ /\:/)
 				c = line.index(':')
 				key = line[0, c].strip
@@ -203,7 +208,11 @@ protected
 					attributes = value[(c + 1)...value.length].strip
 					value = value[0, c].strip
 				end
-				file = value =~ /^https?/ ? value : File.join(dirname,value)
+				if(value =~ /^https?/ || value[0,1]=='/')
+					file =  value
+				else
+					file = File.join(dirname,value)
+				end
 				addAddOns(key, file, attributes)
 				loadSubrecipe(file + ".deps",false) if File.exists?(file + ".deps")
 			elsif(line =~ /\=/)
