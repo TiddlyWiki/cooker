@@ -203,7 +203,15 @@ protected
 				c = line.index(':')
 				key = line[0, c].strip
 				value = line[(c + 1)...line.length].strip
-				c = value.index(' ')
+				d = value.index('.')
+				if(d != nil)
+					c = value[(d + 1)...value.length].strip.index(' ')
+					if(c != nil)
+						c += d + 1
+					end
+				else
+					c = value.index(' ')
+				end
 				if(c != nil)
 					attributes = value[(c + 1)...value.length].strip
 					value = value[0, c].strip
@@ -216,11 +224,9 @@ protected
 				addAddOns(key, file, attributes)
 				loadSubrecipe(file + ".deps",false) if File.exists?(file + ".deps")
 			elsif(line =~ /\=/)
-			#puts "line:"+ line
 				c = line.index('=')
 				key = line[0, c].strip
 				value = line[(c + 1)...line.length]
-			#puts "value:"+ value
 				addAddOns(key, value, nil, true)
 				#@ingredients << Ingredient.new(value, "text")
 			else
