@@ -67,10 +67,10 @@ class Recipe
 								block += b if(b)
 							end
 						end
-						if((Ingredient.compress=~/[pr]+/ && type == "js") || (Ingredient.compressplugins=~/[pr]+/ && type == "jquery") || (Ingredient.compressdeprecated=~/[pr]+/ && type == "jsdeprecated"))
-							if(Ingredient.compress=~/[pr]+/ || Ingredient.compressplugins=~/[pr]+/ || Ingredient.compressdeprecated=~/[pr]+/)
-								block = Ingredient.rhino(block)
-								if(Ingredient.compress=~/.?p.?/ || Ingredient.compressplugins=~/.?p.?/ || Ingredient.compressdeprecated=~/.?p.?/)
+						if((Ingredient.compress=~/[pry]+/ && type == "js") || (Ingredient.compressplugins=~/[pry]+/ && type == "jquery") || (Ingredient.compressdeprecated=~/[pry]+/ && type == "jsdeprecated"))
+							if(Ingredient.compress=~/[pry]+/ || Ingredient.compressplugins=~/[pry]+/ || Ingredient.compressdeprecated=~/[pry]+/)
+								block = Ingredient.compressor(block)
+								if(Ingredient.compress=~/.?p.+/ || Ingredient.compressplugins=~/.?p.+/ || Ingredient.compressdeprecated=~/.?p.+/)
 									block = Ingredient.packr(block)
 								end
 							end

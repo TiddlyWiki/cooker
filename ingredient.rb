@@ -57,6 +57,10 @@ class Ingredient
 		@@compress = compress
 	end
 	
+	def Ingredient.compresstype=(compresstype)
+		@@compresstype = compresstype
+	end
+	
 	def Ingredient.compressplugins
 		@@compressplugins
 	end
@@ -186,12 +190,12 @@ protected
 					out << line unless(line.strip =~ /^\/\/#/)
 				end
 			end
-			if(@@compress=="f" && subtype == "js" && @filename !~ /\/Lingo/ && @filename !~ /\/locale/)
-				out = Ingredient.rhino(out)
+			if(@@compress=="f" && (subtype == "js" || subtype =='jquery') && @filename !~ /\/Lingo/ && @filename !~ /\/locale/) 
+				out = Ingredient.compressor(out)
 			end
 			if(subtype == "jshead" && @@compresshead == true)
 				if(@filename !~ /\.min\./)
-					out = Ingredient.rhino(out)
+					out = Ingredient.compressor(out)
 				end
 				if(@filename !~ /\.pack\./)
 					comment = ""
@@ -209,18 +213,26 @@ protected
 	end
 
 public
-	def Ingredient.rhino(input)
-		inputfile = Tempfile.new('rhino')
+	def Ingredient.compressor(input)
+		inputfile = Tempfile.new('compress')
 		inputfile.print(input)
 		inputfile.close
-		outputfile = Tempfile.new('rhino')
+		outputfile = Tempfile.new('compress')
 		outputfile.close
-		done = system("java -jar custom_rhino.jar -c #{inputfile.path} > #{outputfile.path} 2>&1")
+		if(@@compresstype == "rhino")
+			done = system("java -jar custom_rhino.jar -c #{inputfile.path} > #{outputfile.path} 2>&1")
+		else 
+			done = system("java -jar yuicompressor-2.4.2.jar #{inputfile.path} > #{outputfile.path} --type js") 
+		end
 		if(done)
 			compressed = File.read(outputfile.path)
 		else
 			compressed = input
-			STDERR.puts("Could not compress with custom_rhino.jar.")
+			if(@@compresstype == "rhino")
+				STDERR.puts("Could not compress with custom_rhino.jar.")
+			else
+				STDERR.puts("Could not compress with yuicompressor.jar.")
+			end
 			if(@@compress!="")
 				STDERR.puts("Cooking failed.")
 				exit

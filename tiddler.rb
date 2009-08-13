@@ -160,7 +160,7 @@ class Tiddler
 		if(@usePre)
 			out << "\n<pre>"
 			lines = @contents
-			lines = Ingredient.rhino(lines) if compress
+			lines = Ingredient.compressor(lines) if compress
 			if(escapeHTML)
 				lines = CGI::escapeHTML(lines)
 			end

@@ -22,6 +22,7 @@ class Optparse
 		options.quiet = false
 		options.stripcomments = false
 		options.compress = ""
+		options.compresstype = "rhino"
 		options.compressplugins = ""
 		options.compressdeprecated = ""
 		options.compresshead = ""
@@ -45,7 +46,7 @@ class Optparse
 			#	options.plugins = plugins
 			#end
 
-			opts.on("-c", "--compress COMPRESS", "Compress javascript, use -c, -cr or -crp") do |compress|
+			opts.on("-c", "--compress COMPRESS", "Compress javascript, use -c, -cr, -cy or -crp") do |compress|
 				# three options available
 				# F - compress each .js file individually using rhino
 				# R - compress .js files as a single block
@@ -53,24 +54,35 @@ class Optparse
 				# P and R may be combined, eg -c PR
 				# only P implies PR, Packr compression is not performed without Rhino compression first
 				options.compress = compress.downcase.strip
+				if options.compress=~/y/
+					options.compresstype = "yui"
+				end
 			end
 
-			opts.on("-C", "--cplugins CPLUGINS", "Compress javascript plugins, use -C, -Cr or -Crp") do |compressplugins|
+			opts.on("-C", "--cplugins CPLUGINS", "Compress javascript plugins, use -C, -Cr, -Cy or -Crp") do |compressplugins|
 				# three options available
-				# R - compress .js files as a single block
+				# R - compress .js files as a single block using rhino
+				# Y - compress .js files as a single block using yuicompressor
 				# P - compress .js files as a single block using packr (not yet available)
 				# P and R may be combined, eg -c PR
 				# only P implies PR, Packr compression is not performed without Rhino compression first
 				options.compressplugins = compressplugins.strip
+				if options.compressplugins=~/y/
+					options.compresstype = "yui"
+				end
 			end
 
 			opts.on("-D", "--deprecated DEPRECATED", "Compress deprecated javascript, use -D, -Dr or -Drp") do |compressdeprecated|
 				# three options available
-				# R - compress .js files as a single block
+				# R - compress .js files as a single block using rhino
+				# Y - compress .js files as a single block using yuicompressor
 				# P - compress .js files as a single block using packr (not yet available)
 				# P and R may be combined, eg -c PR
 				# only P implies PR, Packr compression is not performed without Rhino compression first
 				options.compressdeprecated = compressdeprecated.strip
+				if options.compressdeprecated=~/y/
+					options.compresstype = "yui"
+				end
 			end
 
 			opts.on("-H", "--[no-]HEAD", "Compress jshead, use -H") do |compresshead|
@@ -171,6 +183,7 @@ Recipe.plugins = options.plugins
 Recipe.splash = options.splash
 Recipe.ignorecopy = options.ignorecopy
 Ingredient.compress = options.compress
+Ingredient.compresstype = options.compresstype
 Ingredient.compressplugins = options.compressplugins
 Ingredient.compressdeprecated = options.compressdeprecated
 Ingredient.compresshead = options.compresshead
