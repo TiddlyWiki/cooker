@@ -293,7 +293,7 @@ protected
 
 	def loadTiddlyWeb(filename)
 		# read in tiddler from a TiddlyWeb file
-		@title = File.basename(filename.sub(/\/[0-9]+/,""),".tdw")
+		@title = File.basename(filename.sub(/\/[0-9]+/,""),".tid")
 		open(filename) do |file|
 			inAttributes = true
 			@contents = ""
