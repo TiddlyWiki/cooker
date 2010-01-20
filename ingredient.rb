@@ -102,8 +102,9 @@ class Ingredient
 		elsif(@raw == true)
 			return @line
 		end
-			
+
 		@filename = Recipe.injectEnv(@filename)
+		@filename = @filename.gsub("%20", " ")
 
 		if(subtype[0] == "list")
 		elsif(subtype[0] == "tiddler")
