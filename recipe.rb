@@ -4,7 +4,7 @@
 # License: Creative Commons Attribution ShareAlike 3.0 License http://creativecommons.org/licenses/by-sa/3.0/
 
 require 'ingredient'
-require "ftools"
+require "fileutils"
 require 'net/http'
 require 'uri'
 
@@ -362,7 +362,7 @@ protected
 			if ingredient.filename =~ /^https?/
 				downloadFile(ingredient.filename)
 			else
-				File.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename)))
+				FileUtils.copy(ingredient.filename, File.join(outdir, File.basename(ingredient.filename)))
 			end
 		end
 	end
