@@ -1,5 +1,5 @@
 #!/bin/bash
-TW_TRUNKDIR=$HOME/Documents/TiddlyWiki/Trunk
+TW_TRUNKDIR=${TW_TRUNKDIR:-$HOME/Documents/TiddlyWiki/Trunk}
 DEFAULT_FILENAME=index
 FILENAME=${1:-$DEFAULT_FILENAME}
 FILENAME=${FILENAME%\.recipe}
