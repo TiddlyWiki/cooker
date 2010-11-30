@@ -26,6 +26,7 @@ class Optparse
 		options.compressplugins = ""
 		options.compressdeprecated = ""
 		options.compresshead = ""
+		options.outputfile = ""
 		options.plugins = ""
 		options.splash = false
 		options.section = ""
@@ -95,6 +96,10 @@ class Optparse
 					exit
 				end
 				options.dest = dest
+			end
+
+			opts.on("-o", "--outputfile OUTPUTFILE", "Output file") do |outputfile|
+				options.outputfile = outputfile
 			end
 
 			opts.on("-f", "--format FORMAT", "Tiddler format") do |format|
@@ -193,7 +198,7 @@ Tiddler.ginsu = false
 Tiddler.usefiletime = options.usefiletime
 
 ARGV.each do |file|
-	recipe = Recipe.new(file, options.dest)
+	recipe = Recipe.new(file, options.dest, false, options.outputfile)
 	recipe.scanrecipe
 	recipe.cook
 end

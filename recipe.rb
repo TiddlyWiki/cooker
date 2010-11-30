@@ -9,8 +9,9 @@ require 'net/http'
 require 'uri'
 
 class Recipe
-	def initialize(filename, outdir=nil, isTemplate=false)
+	def initialize(filename, outdir=nil, isTemplate=false, outputfile=nil)
 		@outdir = outdir ||= ""
+		@outputfile = outputfile ||= ""
 		@ingredients = Array.new
 		@addons = Hash.new
 		@tiddlers = Hash.new
@@ -150,7 +151,11 @@ protected
 	end
 
 	def outfilename
-		outdir + Recipe.env('TW_COOK_OUTPUT_PREFIX') + File.basename(@filename.sub(".recipe", ""))
+		if(@outputfile == "")
+			return outdir + Recipe.env('TW_COOK_OUTPUT_PREFIX') + File.basename(@filename.sub(".recipe", ""))
+		else
+			return outdir + Recipe.env('TW_COOK_OUTPUT_PREFIX') + @outputfile
+		end
 	end
 
 	def ingredients

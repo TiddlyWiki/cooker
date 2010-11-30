@@ -192,6 +192,7 @@ protected
 				end
 			end
 			if(@@compress=="f" && (subtype == "js" || subtype =='jquery') && @filename !~ /\/Lingo/ && @filename !~ /\/locale/) 
+				puts "commpressing: " + @filename
 				out = Ingredient.compressor(out)
 			end
 			if(subtype == "jshead" && @@compresshead == true)
