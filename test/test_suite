@@ -1,5 +1,6 @@
 #!/bin/bash
 export PATH=../:$PATH$
+export RUBYLIB=..
 ./test1_help
 ./test2_env
 ./test3_no_env
