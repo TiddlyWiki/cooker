@@ -97,6 +97,8 @@ class Tiddler
 	def load(filename)
 		if(filename =~ /\.js$/)
 			loadJs(filename)
+		elsif(filename =~ /\.svg$/)
+			loadSvg(filename)
 		else
 			loadTiddlyWeb(filename)
 		end
@@ -289,6 +291,31 @@ protected
 			end
 		end
 		@title ||= File.basename(filename,".js")
+	end
+
+	def loadSvg(filename)
+		# read in a tiddler from a .svg and a .svg.meta pair of files
+		begin #use begin rescue block since there may not be a .meta file if the attributes are obtained from the .recipe file
+			open(filename + ".meta") do |infile|
+				infile.each_line do |line|
+					readAttributes(line)
+				end
+			end
+		rescue
+		end
+		open(filename) do |infile|
+			@contents = ""
+			infile.each_line do |line|
+				@contents << line unless(line.strip =~ /^\/\/#/)
+			end
+			unless filename =~ /^https?/
+				@created ||= infile.mtime.utc.strftime("%Y%m%d%H%M")
+			end
+			if(@@usefiletime)
+				@modified = infile.mtime.utc.strftime("%Y%m%d%H%M")
+			end
+		end
+		@title ||= File.basename(filename,".svg")
 	end
 
 	def loadTiddlyWeb(filename)
