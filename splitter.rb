@@ -40,7 +40,7 @@ class Splitter
 
 
 	def split
-		recipes = {"main" => "", "shadows" => "", "plugins" => "", "content" => "", "feeds" => "", "themes" => "", "tags" => "", "templates" => ""}
+		recipes = {"main" => "", "shadows" => "", "plugins" => "", "content" => "", "svg" => "", "feeds" => "", "themes" => "", "tags" => "", "templates" => ""}
 
 		tiddlerCount = readStoreArea(recipes)
 		if(tiddlerCount == 0)
@@ -97,6 +97,23 @@ private
 				out << tiddler.to_meta
 			end
 			recipes["plugins"] << "tiddler: #{tiddlerFilename}\n"
+			
+		elsif(tiddler.tags =~ /svg/)
+			dirname = @dirname
+			if(@@usesubdirectories)
+				dirname = File.join(@dirname, "svg")
+				if(!File.exists?(dirname))
+					Dir.mkdir(dirname)
+				end
+			end
+			targetfile = File.join(dirname, tiddlerFilename += ".svg")
+			File.open(targetfile, File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+				out << tiddler.contents
+			end
+			File.open(targetfile + ".meta", File::CREAT|File::TRUNC|File::RDWR, 0644) do |out|
+				out << tiddler.to_meta
+			end
+			recipes["svg"] << "tiddler: #{tiddlerFilename}\n"
 		else
 			if(tiddler.tags =~ /systemServer/)
 				writeTiddlerToSubDir(tiddler, tiddlerFilename, recipes["feeds"], "feeds")
