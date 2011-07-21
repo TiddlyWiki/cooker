@@ -1,12 +1,24 @@
-#!/bin/bash
+#!/bin/sh
+
+# This is a sample cook script to be used with the build scripts
+# and Makefile for TiddlyWiki. Adjust this script and then install
+# it somewhere on your $PATH, such as ~/bin.
+#
+# You will need to adjust DEFAULT_TRUNK and COOKER_TRUNK below.
+
+# change this to where your tiddlywiki repo lives,
+# unless you have TW_TRUNKDIR set.
+DEFAULT_TRUNK=/media/Daten/Git/tiddly/
+
+# Change this to where you have the cooker code installed
+COOKER_TRUNK=/media/Daten/Git/tiddly/tools/cooker
+
 if [ -z "$TW_TRUNKDIR" ]
 then
-	echo 'TW_TRUNKDIR should be set to "/the/path/to/your/tiddlywiki.org/Trunk"'
-	exit 2
+    export TW_TRUNKDIR=$DEFAULT_TRUNK
 fi
-DEFAULT_FILENAME=index
-FILENAME=${1:-$DEFAULT_FILENAME}
 DEST=$PWD
-RECIPE=$PWD/$FILENAME.html.recipe
+RECIPE=$1 && shift
+OUTPUT=$1 && shift
 
-ruby -C $TW_TRUNKDIR/tools/cooker cook.rb $RECIPE -d$DEST -r$TW_TRUNKDIR $2 $3 $4
+ruby -Ku -C $COOKER_TRUNK cook.rb $RECIPE -o $OUTPUT -d $DEST "$@"

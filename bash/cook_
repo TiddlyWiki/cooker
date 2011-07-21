@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ -z "$TW_TRUNKDIR" ]
+then
+	echo 'TW_TRUNKDIR should be set to "/the/path/to/your/tiddlywiki.org/Trunk"'
+	exit 2
+fi
+DEFAULT_FILENAME=index
+FILENAME=${1:-$DEFAULT_FILENAME}
+DEST=$PWD
+RECIPE=$PWD/$FILENAME.html.recipe
+
+ruby -C $TW_TRUNKDIR/tools/cooker cook.rb $RECIPE -d$DEST -r$TW_TRUNKDIR $2 $3 $4

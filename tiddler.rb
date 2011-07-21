@@ -96,7 +96,9 @@ class Tiddler
 
 	def load(filename)
 		if(filename =~ /\.js$/)
-			loadJs(filename)
+			loadFile(filename, ".js")
+		elsif(filename =~ /\.svg$/)
+			loadFile(filename, ".svg")
 		else
 			loadTiddlyWeb(filename)
 		end
@@ -266,7 +268,7 @@ class Tiddler
 	end
 
 protected
-	def loadJs(filename)
+	def loadFile(filename, extension)
 		# read in a tiddler from a .js and a .js.meta pair of files
 		begin #use begin rescue block since there may not be a .meta file if the attributes are obtained from the .recipe file
 			open(filename + ".meta") do |infile|
@@ -288,7 +290,7 @@ protected
 				@modified = infile.mtime.utc.strftime("%Y%m%d%H%M")
 			end
 		end
-		@title ||= File.basename(filename,".js")
+		@title ||= File.basename(filename, extension)
 	end
 
 	def loadTiddlyWeb(filename)
