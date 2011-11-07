@@ -49,9 +49,67 @@ When used to split a TiddlyWiki file called `index.html`, Ginsu creates a direct
 recipe files
 ------------
 
-To come.
+`.recipe` files are text files that list the components to be assembled into a TiddlyWiki. It links to a simple template file that contains the basic structure of the TiddlyWiki document with additional markers to identify parts of the file where ingredients are inserted.
+
+Each line of the recipe file lists an ingredient, prefixed with a tag that describes what to do with the ingredient. Tags either identify a marker within the template file or are special tags that initiate an action.
+
+The available special tags are:
+
+	recipe: specifies a sub-recipe to be processed
+	template: specifies the template file to be used
+	copy: specifies an additional file that is to be copied alongside the cooked TiddlyWiki
+
+The default TiddlyWiki template (http://github.com/TiddlyWiki/tiddlywiki/tiddlywiki.template.html) contains the following markers. Some of them invoke special processing as noted.
+
+	version
+	copyright
+	prehead
+	title: automatically filled in from the SiteTitle and SubTitle tiddlers
+	style
+	posthead
+	prebody
+	noscript
+	shadow
+	tiddler: see section on tiddler processing below
+	plugin
+	posttiddlers
+	postbody
+	prejs
+	js
+	postjs
+	jsext
+	jsdeprecated
+	jslib
+	jquery
+	postscript
+
+Tiddler processing
+------------------
+
+The `tiddler` marker can be used to text or JavaScript tiddlers:
+
+	tiddler:TiddlerName.[js|tiddler] {optional attributes}
+
+The `TiddlerName` can be a local file path (relative or absolute), or an http/https URL.
+
+The optional attributes can be used to set the title, description, or tags of the tiddler. Additional tags can be added without removing any existing tags:
+
+	tiddler:ClivesThoughts.tiddler tags="blog published"
+	tiddler:LegacyStrikeThroughPlugin.js tags+="excludeLists excludeSearch"
+	tiddler:temp.tiddler title="The Real Title" Description="Foo bar ear eef"
+
+Note there is no space around `=` or `+=`.
 
 tiddler files
 -------------
 
-To come.
+Tiddler content can be retrieved from a variety of different file types:
+
+	`*.tiddler` - a raw TiddlyWiki <DIV>
+	`*.tid` - a plain text tiddler (aka TiddlyWeb format)
+	`*.js` - a JavaScript plugin
+
+Additional meta information can be provided with these optional additional filetypes:
+
+	`TiddlerName.meta` - metadata fields like `title`, `modified`,`created`,`tags` etc.
+	`TiddlerName.deps` - a listing of dependent tiddlers, useful for plugins
