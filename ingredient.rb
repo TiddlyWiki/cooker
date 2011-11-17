@@ -123,6 +123,8 @@ class Ingredient
 		elsif(subtype[0] == "shadow")
 			if(@filename =~ /\.tiddler$/)
 				return to_s_retiddle(subtype[0])
+			elsif(@filename =~ /\.tid$/)
+				return to_s_tiddler
 			else
 				# have a non-tidler in the shadow area, so output it raw
 				return to_s_line(subtype[0])
@@ -133,6 +135,8 @@ class Ingredient
 			if(@filename =~ /\.tiddler$/)
 				# not in tiddler, shadow or plugin, so output raw content of tiddler
 				return to_s_raw(subtype[0])
+			elsif(@filename =~ /\.tid$/)
+				return to_s_raw_tid(subtype[0])
 			else
 				return to_s_line(subtype[0])
 			end
@@ -175,6 +179,13 @@ protected
 	def to_s_raw(subtype)
 		tiddler = Tiddler.new
 		tiddler.loadDiv(@filename)
+		tiddler.setAttributes(@attributes)
+		return tiddler.to_raw(subtype)
+	end
+
+	def to_s_raw_tid(subtype)
+		tiddler = Tiddler.new
+		tiddler.load(@filename)
 		tiddler.setAttributes(@attributes)
 		return tiddler.to_raw(subtype)
 	end
