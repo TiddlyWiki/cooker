@@ -86,7 +86,7 @@ The default TiddlyWiki template (http://github.com/TiddlyWiki/tiddlywiki/tiddlyw
 Tiddler processing
 ------------------
 
-The `tiddler` marker can be used to text or JavaScript tiddlers:
+The `tiddler` marker can be used to insert text or JavaScript tiddlers:
 
 	tiddler:TiddlerName.[js|tiddler] {optional attributes}
 
@@ -113,3 +113,17 @@ Additional meta information can be provided with these optional additional filet
 
 	`TiddlerName.meta` - metadata fields like `title`, `modified`,`created`,`tags` etc.
 	`TiddlerName.deps` - a listing of dependent tiddlers, useful for plugins
+	
+Older `*.tiddler` files look like this:
+
+	<div tiddler="AnotherExampleStyleSheet" modifier="JeremyRuston" modified="200508181432" created="200508181432" tags="examples">This is an old-school .tiddler file, without an embedded &lt;pre&gt; tag.\nNote how the body is &quot;HTML encoded&quot; and new lines are escaped to \\n</div>
+
+More recent `*.tiddler` files look like this:
+
+	<div title="AnotherExampleStyleSheet" modifier="blaine" created="201102111106" modified="201102111310" tags="examples" creator="psd">
+	<pre>Note that there is now an embedded <pre> tag, and line feeds are not escaped.
+	
+	But, weirdly, there is no HTML encoding of the body.</pre>
+	</div>
+
+These `*.tiddler` files are therefore not quite the same as the tiddlers found inside a TiddlyWiki HTML file, where the body is HTML encoded in the expected way.
