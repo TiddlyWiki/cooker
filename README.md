@@ -41,8 +41,6 @@ ginsu
 	    -h, --help                       Show this message
 	        --version                    Show version
 
-Note that the `tiddlywikiname` should not include the `.html` file extension.
-
 When used to split a TiddlyWiki file called `index.html`, Ginsu creates a directory named `index.html.0` to contain the tiddler files (The `0` bumps up if the directory already exists). It also includes a file called `split.recipe` that contains the recipe for reconstituting the original TiddlyWiki. The individual tiddlers are saved as:
 
 * a `*.tiddler` file for text tiddlers
