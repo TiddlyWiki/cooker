@@ -1,7 +1,7 @@
 TiddlyWiki Build Tools
 ======================
 
-`cook` and `ginsu` are tools to manipulate TiddlyWiki files. `cook` produces TiddlyWiki files from recipes that list the ingredients. `ginsu` takes a TiddlyWiki HTML file and pulls the tiddlers out into separate files.
+`cook` and `ginsu` are tools to manipulate TiddlyWiki Classic files. They are not compatible with TiddlyWiki version 5 and above. `cook` produces TiddlyWiki files from recipes that list the ingredients. `ginsu` takes a TiddlyWiki HTML file and pulls the tiddlers out into separate files.
 
 cook
 ----
